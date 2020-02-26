@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,7 @@ namespace TournamentWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,6 +27,12 @@ namespace TournamentWebApi.Controllers
             this._userManager = userManager;
         }
 
+        [HttpGet]
+        public ActionResult<IEnumerable<string>> Get()
+        {
+            return Ok(new UserLoginModel() { firstName="test"});
+        }
+
         //[HttpGet]
         //public UserModel GetById()
         //{
@@ -33,6 +40,24 @@ namespace TournamentWebApi.Controllers
         //    UserData data = new UserData();
 
         //    return data.GetUserById(userId).First(); 
+        //}
+
+        [HttpPost]
+        [Route("Test")]
+        public IActionResult Test(UserLoginModel test)
+        {
+            if(test!=null) return Ok();
+
+            return BadRequest();
+        }
+
+        //[HttpPost]
+        //public ActionResult TestMethod(string firstName)
+        //{
+        //    // Do something with username and password
+        //    var user = firstName;
+        //    //var passWord = password;
+        //    return null;
         //}
 
         [Authorize(Roles = "Admin")]
@@ -44,8 +69,8 @@ namespace TournamentWebApi.Controllers
 
             var users = _context.Users.ToList();
             var uRoles = from userRoles in _context.UserRoles
-                        join r in _context.Roles on userRoles.RoleId equals r.Id
-                        select new { userRoles.UserId, userRoles.RoleId, r.Name };
+                         join r in _context.Roles on userRoles.RoleId equals r.Id
+                         select new { userRoles.UserId, userRoles.RoleId, r.Name };
 
 
             foreach (var user in users)
@@ -57,7 +82,7 @@ namespace TournamentWebApi.Controllers
                 };
 
                 userModel.Roles = uRoles.Where(x => x.UserId == userModel.Id)
-                                        .ToDictionary(key =>key.RoleId,val=>val.Name);
+                                        .ToDictionary(key => key.RoleId, val => val.Name);
 
                 userList.Add(userModel);
             }
@@ -67,7 +92,7 @@ namespace TournamentWebApi.Controllers
         [Authorize(Roles = "Admin")]
         [HttpGet]
         [Route("api/User/Admin/GetAllRoles")]
-        public Dictionary<string,string> GetAllRoles()
+        public Dictionary<string, string> GetAllRoles()
         {
             var roles = _context.Roles.ToDictionary(x => x.Id, x => x.Name);
             return roles;

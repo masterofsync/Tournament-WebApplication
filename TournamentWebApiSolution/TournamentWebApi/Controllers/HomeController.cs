@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using TournamentWebApi.Models;
+using DotNetTools.Adapter;
 
 namespace TournamentWebApi.Controllers
 {
@@ -13,6 +17,8 @@ namespace TournamentWebApi.Controllers
     {
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<IdentityUser> _userManager;
+
+        private readonly string BaseUri = "https://localhost:5001/api/";
 
         public HomeController(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
         {
@@ -22,6 +28,23 @@ namespace TournamentWebApi.Controllers
         public IActionResult Index()
         {
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Test(string firstName)
+        {
+            var newModel = new UserLoginModel()
+            {
+                firstName = firstName
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(newModel), Encoding.UTF8, "application/json");
+            var url = "User/Test";
+
+            var post= await HttpClientAdapter.Post(BaseUri +url, content);
+            var data= await HttpClientAdapter.GetAsync<UserLoginModel>(BaseUri+"User");
+
+            return Content($"Hello {data.firstName}");
         }
 
         public IActionResult About()
@@ -51,7 +74,7 @@ namespace TournamentWebApi.Controllers
 
             //var user = await _userManager.FindByEmailAsync("bikzzzzz@gmail.com");
 
-            //if (user !=null)
+            //if (user != null)
             //{
             //    await _userManager.AddToRoleAsync(user, "Admin");
             //}
