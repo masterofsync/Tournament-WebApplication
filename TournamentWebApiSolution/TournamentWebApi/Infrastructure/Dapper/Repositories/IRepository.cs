@@ -6,16 +6,11 @@ using System.Threading.Tasks;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
-    public interface IRepository<ObjectType> where ObjectType : class
+    public interface IRepository<T>
     {
-        ObjectType Get(int id);
-        IEnumerable<ObjectType> GetAll();
-        IEnumerable<ObjectType> Find(Expression<Func<ObjectType, bool>> predicate);
-
-        void Add(ObjectType o);
-        void AddRange(IEnumerable<ObjectType> o);
-
-        void Remove(ObjectType o);
-        void RemoveRange(IEnumerable<ObjectType> o);
+        Task<T> GetAsync(Guid id);
+        Task<IEnumerable<T>> GetAllAsync();
+        Task DeleteRowAsync(Guid id);
+        Task AddAsync(T t);
     }
 }
