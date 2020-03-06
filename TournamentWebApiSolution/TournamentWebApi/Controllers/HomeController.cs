@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using TournamentWebApi.Models;
 using DotNetTools.Adapter;
+using TournamentWebApi.Infrastructure.Dapper.Repositories;
+using Microsoft.Extensions.Configuration;
 
 namespace TournamentWebApi.Controllers
 {
@@ -50,6 +52,9 @@ namespace TournamentWebApi.Controllers
         public IActionResult About()
         {
             ViewData["Message"] = "Your application description page.";
+
+
+            //SportRepository sportRepo = new SportRepository();
 
             return View();
         }

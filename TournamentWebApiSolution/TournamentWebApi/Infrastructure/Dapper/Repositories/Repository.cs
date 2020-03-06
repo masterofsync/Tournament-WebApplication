@@ -14,19 +14,12 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
     public class Repository<T> : IDisposable, IRepository<T> where T : class
     {
-
         public IConfiguration Configuration { get; set; }
+        private IDbConnection _connection;
+        private IDbTransaction _transaction;
 
-        private readonly string _tableName;
         protected Repository(IConfiguration config)
         {
-            _tableName = null;
-            Configuration = config;
-        }
-
-        protected Repository(string tableName, IConfiguration config)
-        {
-            _tableName = tableName;
             Configuration = config;
         }
 
@@ -41,8 +34,6 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             conn.Open();
             return conn;
         }
-
-        private IEnumerable<PropertyInfo> GetProperties => typeof(T).GetProperties();
 
         public List<Tt> LoadData<Tt, U>(string storedProcedure, U parameters, string connectionStringName)
         {
@@ -64,82 +55,87 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             }
         }
 
-        private IDbConnection _connection;
-        private IDbTransaction _transaction;
-
         public void StartTransaction()
         {
             _connection = SqlConnection();
+            _connection.Open();
 
             _transaction = _connection.BeginTransaction();
+            isClosed = false;
         }
 
-        public List<Tt> LoadDataInTransaction<Tt, U>(string storedProcedure, U parameters)
+        public IEnumerable<Tt> LoadDataInTransactionUsingStoredProcedure<Tt, U>(string storedProcedure, U parameters)
         {
             List<Tt> rows = _connection.Query<Tt>(storedProcedure, parameters,
                             commandType: CommandType.StoredProcedure, transaction: _transaction).ToList(); 
             return rows;
         }
 
-        public void SaveDataInTransaction<Tt>(string storedProcedure, Tt parameters)
+        public IEnumerable<Tt> LoadDataInTransactionUsingQuery<Tt, U>(string sqlQuery, U parameters)
+        {
+            List<Tt> rows = _connection.Query<Tt>(sqlQuery, parameters,
+                            commandType: CommandType.Text, transaction: _transaction).ToList();
+            return rows;
+        }
+
+        public void SaveDataInTransactionUsingStoredProcedure<Tt>(string storedProcedure, Tt parameters)
         {
             _connection.Execute(storedProcedure, parameters,
                                 commandType: CommandType.StoredProcedure, transaction: _transaction);
         }
 
+        public void SaveDataInTransactionUsingQuery<Tt>(string sqlQuery, Tt parameters)
+        {
+            _connection.Execute(sqlQuery, parameters,
+                                commandType: CommandType.Text, transaction: _transaction);
+        }
+
+        private bool isClosed = false;
+
         public void CommitTransaction()
         {
-            _transaction?.Commit();
-            _connection?.Close();
+            try
+            {
+                _transaction?.Commit();
+                _connection?.Close();
+
+                isClosed = true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public void RollbackTransaction()
         {
-            _transaction?.Rollback();
-            _connection?.Close();
+            try
+            {
+                _transaction?.Rollback();
+                _connection?.Close();
+                isClosed = true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
+
         public void Dispose()
         {
-            CommitTransaction();
-        }
-
-        #region Interface Implementation
-        public async Task<T> GetAsync(Guid id)
-        {
-            using (var connection = CreateConnection())
+            if (!isClosed)
             {
-                var result = await connection.QuerySingleOrDefaultAsync<T>($"SELECT * FROM {_tableName} WHERE Id=@Id", new { Id = id });
-
-                if (result == null)
+                try
                 {
-                    throw new KeyNotFoundException($"{_tableName} with id [{id}] could not be found.");
+                    CommitTransaction();
                 }
-
-                return result;
+                catch
+                {
+                    // Log??
+                }
             }
+            _transaction = null;
+            _connection = null;
         }
-
-        public async Task<IEnumerable<T>> GetAllAsync()
-        {
-            using (var connection = CreateConnection())
-            {
-                return await connection.QueryAsync<T>($"SELECT * FROM{_tableName}");
-            }
-        }
-
-        public async Task DeleteRowAsync(Guid id)
-        {
-            using (var connection = CreateConnection())
-            {
-                var result = await connection.ExecuteAsync($"DELETE FROM {_tableName} WHERE Id=@Id", new { Id = id });
-            }
-        }
-
-        public async Task AddAsync(T t)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
     }
 }

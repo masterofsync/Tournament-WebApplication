@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using TournamentWebApi.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TournamentWebApi.Infrastructure.Dapper.Repositories;
 
 namespace TournamentWebApi
 {
@@ -33,6 +34,7 @@ namespace TournamentWebApi
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+            services.AddTransient<ISportRepository, SportRepository>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(

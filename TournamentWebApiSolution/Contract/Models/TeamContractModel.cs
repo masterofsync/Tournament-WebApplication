@@ -11,9 +11,9 @@ namespace Contract.Models
         public string Name { get; set; }
 
         public string Description { get; set; }
-        //public int SportId { get; set; }
+        public int SportId { get; set; }
         public string  Sport { get; set; }
 
-        //public int TeamStatsId { get; set; }
+        public int TeamStatsId { get; set; }
     }
 }
