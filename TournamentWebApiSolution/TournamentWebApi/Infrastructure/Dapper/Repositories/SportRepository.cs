@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Contract.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
@@ -44,7 +43,11 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             }
         }
 
-        public async Task<IEnumerable<SportContractModel>> GetAllSport()
+        /// <summary>
+        /// Get all sports. 
+        /// </summary>
+        /// <returns>IEnumerable SportContractModel</returns>
+        public async Task<IEnumerable<SportContractModel>> GetAllSportAsync()
         {
             try
             {
@@ -66,7 +69,12 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             }
         }
 
-        public async Task<SportContractModel> GetSport(int id)
+        /// <summary>
+        /// Get sport given id.
+        /// </summary>
+        /// <param name="id">integer</param>
+        /// <returns>SportContractModel</returns>
+        public async Task<SportContractModel> GetSportAsync(int id)
         {
             try
             {
@@ -118,6 +126,11 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             }
         }
 
+        /// <summary>
+        /// Delete sport given id.
+        /// </summary>
+        /// <param name="id">integer</param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
         public async Task<IActionResult> DeleteSportAsync(int id)
         {
             try

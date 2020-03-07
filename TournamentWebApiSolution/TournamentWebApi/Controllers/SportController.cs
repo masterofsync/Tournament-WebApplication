@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TournamentWebApi.Infrastructure.Dapper.Repositories;
 using Contract.Models;
+using System.Net;
 
 namespace TournamentWebApi.Controllers
 {
@@ -21,6 +22,11 @@ namespace TournamentWebApi.Controllers
             this.sportRepo = sportRepo;
         }
 
+        /// <summary>
+        /// POST: api/Sport. Add a sport.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
         [HttpPost]
         public async Task<IActionResult> AddSportAsync(SportContractModel model)
         {
@@ -30,45 +36,58 @@ namespace TournamentWebApi.Controllers
             }
             catch (Exception)
             {
-                throw;// update this to proper return later
+                // Log??
+                return BadRequest();
             }
         }
 
-        // GET: api/Sport . Gets all
+        /// <summary>
+        /// GET: api/Sport . Gets all sports
+        /// </summary>
+        /// <returns>Sport Data</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SportContractModel>>> GetAllSportAsync()
         {
             try
             {
-                var model = await sportRepo.GetAllSport();
+                var model = await sportRepo.GetAllSportAsync();
 
                 // Cannot return IEnumerable type so need to convert to list.
                 return model.ToList(); 
             }
             catch (Exception)
             {
-                return Ok();// update this to proper return later
-                throw;
+                // Log??
+                return BadRequest();
             }
         }
 
-        // GET: api/Sport/1
+        /// <summary>
+        /// GET: api/Sport/1. Get a sport given id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Sport Data</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<SportContractModel>> GetSportAsync(int id)
         {
             try
             {
-                var model = await sportRepo.GetSport(id);
+                var model = await sportRepo.GetSportAsync(id);
 
                 return model;
             }
             catch (Exception)
             {
-                // update this to proper return later
-                throw;
+                // Log??
+                return BadRequest();
             }
         }
 
+        /// <summary>
+        /// PUT: api/Sport. Update a given sport.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
         [HttpPut]
         public async Task<IActionResult> UpdateSportAsync(SportContractModel model)
         {
@@ -81,12 +100,16 @@ namespace TournamentWebApi.Controllers
             }
             catch (Exception)
             {
-                throw;// update this to proper return later
+                // Log??
+                return BadRequest();
             }
         }
 
-
-        // DELETE: api/Sport/delete/1
+        /// <summary>
+        /// DELETE: api/Sport/1. Delete a Sport given id.
+        /// </summary>
+        /// <param name="id">integer</param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -96,9 +119,9 @@ namespace TournamentWebApi.Controllers
             }
             catch (Exception)
             {
-                throw;
+                // Log??
+                return BadRequest();
             }
         }
-
     }
 }

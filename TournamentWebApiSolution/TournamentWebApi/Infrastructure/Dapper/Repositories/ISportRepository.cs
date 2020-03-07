@@ -9,10 +9,9 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
     public interface ISportRepository : IRepository<SportContractModel>
     {
-        Task<IEnumerable<SportContractModel>> GetAllSport();
-        Task<SportContractModel> GetSport(int id);
-
         Task<IActionResult> AddSportAsync(SportContractModel model);
+        Task<IEnumerable<SportContractModel>> GetAllSportAsync();
+        Task<SportContractModel> GetSportAsync(int id);
         Task<IActionResult> DeleteSportAsync(int id);
         Task<IActionResult> UpdateSportAsync(SportContractModel model);
     }
