@@ -13,7 +13,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         Task<SportContractModel> GetSport(int id);
 
         Task<IActionResult> AddSportAsync(SportContractModel model);
-        Task<IActionResult> DeleteSportAsync(SportContractModel model);
+        Task<IActionResult> DeleteSportAsync(int id);
         Task<IActionResult> UpdateSportAsync(SportContractModel model);
     }
 }

@@ -19,17 +19,14 @@ namespace TournamentWebApi.Controllers
         public SportController(ISportRepository sportRepo)
         {
             this.sportRepo = sportRepo;
-            //this.UpdateSportAsync( new SportContractModel() { SportId = 1, Description = "Sport To Play", Name = "Soccer" });
         }
 
         [HttpPost]
-        public async Task AddSportAsync(SportContractModel model)
+        public async Task<IActionResult> AddSportAsync(SportContractModel model)
         {
             try
             {
-                var sportModel = new SportContractModel() { Description = "Best Sport", Name = "Soccer" }; // Example
-
-                await sportRepo.AddSportAsync(sportModel);
+                return await sportRepo.AddSportAsync(model);
             }
             catch (Exception)
             {
@@ -87,5 +84,21 @@ namespace TournamentWebApi.Controllers
                 throw;// update this to proper return later
             }
         }
+
+
+        // DELETE: api/Sport/delete/1
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                return await sportRepo.DeleteSportAsync(id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

@@ -118,9 +118,29 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             }
         }
 
-        public async Task<IActionResult> DeleteSportAsync(SportContractModel model)
+        public async Task<IActionResult> DeleteSportAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                this.StartTransaction();
+
+                string deleteQuery = @"DELETE FROM [dbo].[Sport] WHERE SportId = @Id";
+
+                // delete the row with id
+                var rowsAffected = await SaveDataInTransactionUsingQueryAsync(deleteQuery,new { Id=id});
+                this.CommitTransaction();
+
+                // if rows affected (item deleted)
+                if (rowsAffected > 0)
+                    return new OkResult();
+                else
+                    return new BadRequestResult();
+            }
+            catch (Exception)
+            {
+                this.RollbackTransaction();
+                throw;
+            }
         }
     }
 }
