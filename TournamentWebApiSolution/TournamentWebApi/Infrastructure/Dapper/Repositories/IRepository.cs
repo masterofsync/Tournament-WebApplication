@@ -10,10 +10,9 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
     public interface IRepository<T>
     {
-        IEnumerable<Tt> LoadDataInTransactionUsingStoredProcedure<Tt, U>(string storedProcedure, U parameters);
-        IEnumerable<Tt> LoadDataInTransactionUsingQuery<Tt, U>(string storedProcedure, U parameters);
-        void SaveDataInTransactionUsingStoredProcedure<Tt>(string storedProcedure, Tt parameters);
-        void SaveDataInTransactionUsingQuery<Tt>(string sqlQuery, Tt parameters);
+        Task<IEnumerable<Tt>> LoadDataInTransactionUsingQueryAsync<Tt, U>(string storedProcedure, U parameters);
+        Task<int> SaveDataInTransactionUsingQueryAsync<Tt>(string sqlQuery, Tt parameters);
+
         void CommitTransaction();
         void RollbackTransaction();
         void Dispose();

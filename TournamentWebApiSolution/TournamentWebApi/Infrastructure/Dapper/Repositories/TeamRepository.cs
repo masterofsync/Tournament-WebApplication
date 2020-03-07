@@ -21,7 +21,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 
                 string insertQuery = @"INSERT INTO [dbo].[Team]([Name], [Description], [SportId], [TeamStatsId]) VALUES (@Name, @Description, @SportId, @TeamStatsId)";
                 // save the team model
-                this.SaveDataInTransactionUsingQuery(insertQuery, model);
+                this.SaveDataInTransactionUsingQueryAsync(insertQuery, model);
 
                 this.CommitTransaction();
 

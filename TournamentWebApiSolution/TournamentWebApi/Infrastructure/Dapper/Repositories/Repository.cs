@@ -18,6 +18,14 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         private IDbConnection _connection;
         private IDbTransaction _transaction;
 
+        public IDbConnection GetConnection => _connection;
+
+        public IDbTransaction Transaction
+        {
+            get { return _transaction; }
+            set { _transaction = value; }
+        }
+
         protected Repository(IConfiguration config)
         {
             Configuration = config;
@@ -35,26 +43,6 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             return conn;
         }
 
-        public List<Tt> LoadData<Tt, U>(string storedProcedure, U parameters, string connectionStringName)
-        {
-            using (IDbConnection connection = SqlConnection())
-            {
-                List<Tt> rows = connection.Query<Tt>(storedProcedure, parameters,
-                                commandType: CommandType.StoredProcedure).ToList();
-
-                return rows;
-            }
-        }
-
-        public void SaveData<Tt>(string storedProcedure, Tt parameters, string connectionStringName)
-        {
-            using (IDbConnection connection = SqlConnection())
-            {
-                connection.Execute(storedProcedure, parameters,
-                                    commandType: CommandType.StoredProcedure);
-            }
-        }
-
         public void StartTransaction()
         {
             _connection = SqlConnection();
@@ -64,29 +52,23 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             isClosed = false;
         }
 
-        public IEnumerable<Tt> LoadDataInTransactionUsingStoredProcedure<Tt, U>(string storedProcedure, U parameters)
+        public async Task<IEnumerable<Tt>> LoadDataInTransactionUsingQueryAsync<Tt, U>(string sqlQuery, U parameters)
         {
-            List<Tt> rows = _connection.Query<Tt>(storedProcedure, parameters,
-                            commandType: CommandType.StoredProcedure, transaction: _transaction).ToList(); 
+            var rows = await _connection.QueryAsync<Tt>(sqlQuery, parameters,
+                            commandType: CommandType.Text, transaction: _transaction);
             return rows;
         }
 
-        public IEnumerable<Tt> LoadDataInTransactionUsingQuery<Tt, U>(string sqlQuery, U parameters)
+        public async Task<Tt> LoadSingleDataInTransactionUsingQueryAsync<Tt, U>(string sqlQuery, U parameters)
         {
-            List<Tt> rows = _connection.Query<Tt>(sqlQuery, parameters,
-                            commandType: CommandType.Text, transaction: _transaction).ToList();
-            return rows;
+            var row = await _connection.QuerySingleOrDefaultAsync<Tt>(sqlQuery, parameters,
+                            commandType: CommandType.Text, transaction: _transaction);
+            return row;
         }
 
-        public void SaveDataInTransactionUsingStoredProcedure<Tt>(string storedProcedure, Tt parameters)
+        public async Task<int> SaveDataInTransactionUsingQueryAsync<Tt>(string sqlQuery, Tt parameters)
         {
-            _connection.Execute(storedProcedure, parameters,
-                                commandType: CommandType.StoredProcedure, transaction: _transaction);
-        }
-
-        public void SaveDataInTransactionUsingQuery<Tt>(string sqlQuery, Tt parameters)
-        {
-            _connection.Execute(sqlQuery, parameters,
+            return await _connection.ExecuteAsync(sqlQuery, parameters,
                                 commandType: CommandType.Text, transaction: _transaction);
         }
 

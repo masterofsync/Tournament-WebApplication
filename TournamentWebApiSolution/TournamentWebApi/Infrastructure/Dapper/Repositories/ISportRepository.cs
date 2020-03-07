@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Contract.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
     public interface ISportRepository : IRepository<SportContractModel>
     {
-        IEnumerable<SportContractModel> GetAllSport();
-        SportContractModel GetSport(int id);
+        Task<IEnumerable<SportContractModel>> GetAllSport();
+        Task<SportContractModel> GetSport(int id);
 
-        bool AddSport(SportContractModel model);
-        bool DeleteSport(SportContractModel model);
-        bool UpdateSport(SportContractModel model);
+        Task<IActionResult> AddSportAsync(SportContractModel model);
+        Task<IActionResult> DeleteSportAsync(SportContractModel model);
+        Task<IActionResult> UpdateSportAsync(SportContractModel model);
     }
 }

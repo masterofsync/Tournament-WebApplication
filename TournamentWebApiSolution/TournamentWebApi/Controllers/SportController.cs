@@ -19,21 +19,73 @@ namespace TournamentWebApi.Controllers
         public SportController(ISportRepository sportRepo)
         {
             this.sportRepo = sportRepo;
+            //this.UpdateSportAsync( new SportContractModel() { SportId = 1, Description = "Sport To Play", Name = "Soccer" });
         }
 
         [HttpPost]
-        public void AddSport(SportContractModel model)
+        public async Task AddSportAsync(SportContractModel model)
         {
-            var sportModel = new SportContractModel() { Description="Best Sport",Name="Soccer"}; // Example
+            try
+            {
+                var sportModel = new SportContractModel() { Description = "Best Sport", Name = "Soccer" }; // Example
 
-            sportRepo.AddSport(sportModel);
+                await sportRepo.AddSportAsync(sportModel);
+            }
+            catch (Exception)
+            {
+                throw;// update this to proper return later
+            }
+        }
+
+        // GET: api/Sport . Gets all
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<SportContractModel>>> GetAllSportAsync()
+        {
+            try
+            {
+                var model = await sportRepo.GetAllSport();
+
+                // Cannot return IEnumerable type so need to convert to list.
+                return model.ToList(); 
+            }
+            catch (Exception)
+            {
+                return Ok();// update this to proper return later
+                throw;
+            }
         }
 
         // GET: api/Sport/1
         [HttpGet("{id}")]
-        public async Task<ActionResult<SportContractModel>> GetSport(int id)
+        public async Task<ActionResult<SportContractModel>> GetSportAsync(int id)
         {
-            var model = await sportRepo.GetAllSport
+            try
+            {
+                var model = await sportRepo.GetSport(id);
+
+                return model;
+            }
+            catch (Exception)
+            {
+                // update this to proper return later
+                throw;
+            }
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateSportAsync(SportContractModel model)
+        {
+            try
+            {
+                //var sportModel = new SportContractModel() {SportId=1, Description = "Sport To Play", Name = "Soccer" }; // Example
+
+                // update this to proper return later
+                return await sportRepo.UpdateSportAsync(model);
+            }
+            catch (Exception)
+            {
+                throw;// update this to proper return later
+            }
         }
     }
 }

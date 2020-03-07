@@ -1,20 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Contract.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
     public class SportRepository : Repository<SportContractModel>, ISportRepository
     {
-        public SportRepository(IConfiguration config) :base(config)
+        public SportRepository(IConfiguration config) : base(config)
         {
-
         }
 
-        public bool AddSport(SportContractModel model)
+        /// <summary>
+        /// Add a new sport to the Sport table
+        /// </summary>
+        /// <param name="model">SportContractModel type</param>
+        /// <returns>Ok(Status code:200 if created) else BadRequest(Status code: 400 if not created)</returns>
+        public async Task<IActionResult> AddSportAsync(SportContractModel model)
         {
             try
             {
@@ -22,11 +27,36 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 
                 string insertQuery = @"INSERT INTO [dbo].[Sport]([Name], [Description]) VALUES (@Name, @Description)";
                 // save the team model
-                this.SaveDataInTransactionUsingQuery(insertQuery, model);
+                var rowsAffected = await this.SaveDataInTransactionUsingQueryAsync(insertQuery, model);
 
                 this.CommitTransaction();
 
-                return true;
+                // if rows affected (item created)
+                if (rowsAffected > 0)
+                    return new OkResult();
+                else
+                    return new BadRequestResult();
+            }
+            catch (Exception)
+            {
+                this.RollbackTransaction();
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<SportContractModel>> GetAllSport()
+        {
+            try
+            {
+                this.StartTransaction();
+
+                string getQuery = @"SELECT * FROM [dbo].[Sport]";
+
+                // save the team model
+                var result = await LoadDataInTransactionUsingQueryAsync<SportContractModel, dynamic>(getQuery, null);
+
+                this.CommitTransaction();
+                return result;
             }
             catch (Exception)
             {
@@ -36,39 +66,59 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             }
         }
 
-        public bool DeleteSport(SportContractModel model)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<SportContractModel> GetAllSport()
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<SportContractModel> GetSport(int id)
         {
-            //try
-            //{
-            //    this.StartTransaction();
+            try
+            {
+                this.StartTransaction();
 
-            //    string insertQuery = @"SELECT SportId, Name, Description FROM [dbo].[Sport] WHERE SportId={id}";
-            //    // save the team model
-            //    this.SaveDataInTransactionUsingQuery(insertQuery, model);
+                string getQuery = @"SELECT * FROM [dbo].[Sport] WHERE SportId = @Id";
 
-            //    this.CommitTransaction();
+                // save the team model
+                var result = await LoadSingleDataInTransactionUsingQueryAsync<SportContractModel, dynamic>(getQuery, new { Id = id });
 
-            //    return true;
-            //}
-            //catch (Exception)
-            //{
-            //    this.RollbackTransaction();
-            //    //return false; ??
-            //    throw;
-            //}
+                this.CommitTransaction();
+                return result;
+            }
+            catch (Exception)
+            {
+                this.RollbackTransaction();
+                //return false; ??
+                throw;
+            }
         }
 
-        public bool UpdateSport(SportContractModel model)
+        /// <summary>
+        /// Update sport data 
+        /// </summary>
+        /// <param name="model">SportContractModel type</param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
+        public async Task<IActionResult> UpdateSportAsync(SportContractModel model)
+        {
+            try
+            {
+                this.StartTransaction();
+
+                string updateQuery = @"UPDATE [dbo].[Sport] SET Name= @Name, Description= @Description WHERE SportId = @SportId";
+
+                var rowsAffected = await this.SaveDataInTransactionUsingQueryAsync(updateQuery,model);
+
+                this.CommitTransaction();
+
+                // if rows affected (item created)
+                if (rowsAffected > 0)
+                    return new OkResult();
+                else
+                    return new BadRequestResult();
+            }
+            catch (Exception)
+            {
+                this.RollbackTransaction();
+                throw;
+            }
+        }
+
+        public async Task<IActionResult> DeleteSportAsync(SportContractModel model)
         {
             throw new NotImplementedException();
         }
