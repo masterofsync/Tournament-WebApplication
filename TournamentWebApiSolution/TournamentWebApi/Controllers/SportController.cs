@@ -111,7 +111,7 @@ namespace TournamentWebApi.Controllers
         /// <param name="id">integer</param>
         /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteSportAsync(int id)
         {
             try
             {

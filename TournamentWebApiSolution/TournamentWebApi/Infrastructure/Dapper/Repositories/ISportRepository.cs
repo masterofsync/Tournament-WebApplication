@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
-    public interface ISportRepository : IRepository<SportContractModel>
+    public interface ISportRepository : IRepository
     {
         Task<IActionResult> AddSportAsync(SportContractModel model);
         Task<IEnumerable<SportContractModel>> GetAllSportAsync();
