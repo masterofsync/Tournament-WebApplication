@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Protocols;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
-    public class Repository<T> : IDisposable, IRepository<T> where T : class
+    public class Repository : IDisposable, IRepository
     {
         public IConfiguration Configuration { get; set; }
         private IDbConnection _connection;
@@ -52,21 +52,21 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             isClosed = false;
         }
 
-        public async Task<IEnumerable<Tt>> LoadDataInTransactionUsingQueryAsync<Tt, U>(string sqlQuery, U parameters)
+        public async Task<IEnumerable<T>> LoadDataInTransactionUsingQueryAsync<T, U>(string sqlQuery, U parameters)
         {
-            var rows = await _connection.QueryAsync<Tt>(sqlQuery, parameters,
+            var rows = await _connection.QueryAsync<T>(sqlQuery, parameters,
                             commandType: CommandType.Text, transaction: _transaction);
             return rows;
         }
 
-        public async Task<Tt> LoadSingleDataInTransactionUsingQueryAsync<Tt, U>(string sqlQuery, U parameters)
+        public async Task<T> LoadSingleDataInTransactionUsingQueryAsync<T, U>(string sqlQuery, U parameters)
         {
-            var row = await _connection.QuerySingleOrDefaultAsync<Tt>(sqlQuery, parameters,
+            var row = await _connection.QuerySingleOrDefaultAsync<T>(sqlQuery, parameters,
                             commandType: CommandType.Text, transaction: _transaction);
             return row;
         }
 
-        public async Task<int> SaveDataInTransactionUsingQueryAsync<Tt>(string sqlQuery, Tt parameters)
+        public async Task<int> SaveDataInTransactionUsingQueryAsync<T>(string sqlQuery, T parameters)
         {
             return await _connection.ExecuteAsync(sqlQuery, parameters,
                                 commandType: CommandType.Text, transaction: _transaction);

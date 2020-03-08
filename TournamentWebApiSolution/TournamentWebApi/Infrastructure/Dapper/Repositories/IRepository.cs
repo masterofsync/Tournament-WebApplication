@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
-    public interface IRepository<T>
+    public interface IRepository
     {
-        Task<IEnumerable<Tt>> LoadDataInTransactionUsingQueryAsync<Tt, U>(string storedProcedure, U parameters);
-        Task<Tt> LoadSingleDataInTransactionUsingQueryAsync<Tt, U>(string sqlQuery, U parameters);
-        Task<int> SaveDataInTransactionUsingQueryAsync<Tt>(string sqlQuery, Tt parameters);
+        Task<IEnumerable<T>> LoadDataInTransactionUsingQueryAsync<T, U>(string storedProcedure, U parameters);
+        Task<T> LoadSingleDataInTransactionUsingQueryAsync<T, U>(string sqlQuery, U parameters);
+        Task<int> SaveDataInTransactionUsingQueryAsync<T>(string sqlQuery, T parameters);
 
         void CommitTransaction();
         void RollbackTransaction();

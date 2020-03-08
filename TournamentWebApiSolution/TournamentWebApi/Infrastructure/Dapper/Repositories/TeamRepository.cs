@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
-    public class TeamRepository : Repository<TeamContractModel>, ITeamRepository
+    public class TeamRepository : Repository, ITeamRepository
     {
         public TeamRepository(IConfiguration config) : base(config)
         {

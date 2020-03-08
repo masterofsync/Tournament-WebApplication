@@ -6,7 +6,7 @@ using Contract.Models;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
-    public interface ITeamRepository:IRepository<TeamContractModel>
+    public interface ITeamRepository:IRepository
     {
         IEnumerable<TeamContractModel> GetAllTeamsOfSport(string sportName);
 
