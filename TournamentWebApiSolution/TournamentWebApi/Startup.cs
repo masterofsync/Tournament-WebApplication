@@ -13,6 +13,9 @@ using TournamentWebApi.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TournamentWebApi.Infrastructure.Dapper.Repositories;
+using Microsoft.OpenApi.Models;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace TournamentWebApi
 {
@@ -45,6 +48,34 @@ namespace TournamentWebApi
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "JwtBearer";
+                options.DefaultChallengeScheme = "JwtBearer";
+            })
+                .AddJwtBearer("JwtBearer", jwtbearerOptions =>
+                 {
+                     jwtbearerOptions.TokenValidationParameters = new TokenValidationParameters
+                     {
+                         ValidateIssuerSigningKey = true,
+                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenString"])),
+                         ValidateIssuer = false,
+                         ValidateAudience = false,
+                         ValidateLifetime = true,
+                         ClockSkew = TimeSpan.FromMinutes(5)
+                     };
+                 });
+
+            services.AddSwaggerGen(setup =>
+            {
+                setup.SwaggerDoc(
+                    "v1",
+                    new OpenApiInfo
+                    {
+                        Title = "Tournament API",
+                        Version = "v1"
+                    });
+            });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
@@ -64,9 +95,18 @@ namespace TournamentWebApi
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseCookiePolicy();
+            //app.UseCookiePolicy();
+            
 
             app.UseAuthentication();
+            //app.UseAuthorization(); Check why this doesn't work
+
+            app.UseSwagger();
+            app.UseSwaggerUI(x=>
+            {
+                x.SwaggerEndpoint("/swagger/v1/swagger.json", "Tournament API v1");
+            });
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
