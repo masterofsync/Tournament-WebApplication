@@ -17,13 +17,13 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         {
             try
             {
-                this.StartTransaction();
+                //this.StartTransaction();
 
-                string insertQuery = @"INSERT INTO [dbo].[Team]([Name], [Description], [SportId], [TeamStatsId]) VALUES (@Name, @Description, @SportId, @TeamStatsId)";
-                // save the team model
-                this.SaveDataInTransactionUsingQueryAsync(insertQuery, model);
+                //string insertQuery = @"INSERT INTO [dbo].[Team]([Name], [Description], [SportId], [TeamStatsId]) VALUES (@Name, @Description, @SportId, @TeamStatsId)";
+                //// save the team model
+                //this.SaveDataInTransactionUsingQueryAsync(insertQuery, model);
 
-                this.CommitTransaction();
+                //this.CommitTransaction();
 
                 return true;
             }

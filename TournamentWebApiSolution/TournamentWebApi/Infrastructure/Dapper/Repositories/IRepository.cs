@@ -14,6 +14,9 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         Task<T> LoadSingleDataInTransactionUsingQueryAsync<T, U>(string sqlQuery, U parameters);
         Task<int> SaveDataInTransactionUsingQueryAsync<T>(string sqlQuery, T parameters);
 
+        Task<IEnumerable<T>> LoadDataAsync<T, U>(string query, U parameters);
+        Task<int> SaveDataAsync<U>(string query, U parameters);
+
         void CommitTransaction();
         void RollbackTransaction();
         void Dispose();
