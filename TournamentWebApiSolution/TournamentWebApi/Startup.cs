@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TournamentWebApi.Data;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +15,7 @@ using TournamentWebApi.Infrastructure.Dapper.Repositories;
 using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.Extensions.Hosting;
 
 namespace TournamentWebApi
 {
@@ -37,6 +37,7 @@ namespace TournamentWebApi
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+
             services.AddTransient<ISportRepository, SportRepository>();
             services.AddTransient<ITournamentRepository, TournamentRepository>();
 
@@ -76,11 +77,13 @@ namespace TournamentWebApi
                         Version = "v1"
                     });
             });
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddControllersWithViews();
+            services.AddRazorPages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -89,29 +92,34 @@ namespace TournamentWebApi
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            //app.UseCookiePolicy();
-            
+
+            app.UseRouting();
 
             app.UseAuthentication();
-            //app.UseAuthorization(); Check why this doesn't work
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapAreaControllerRoute(
+                    "admin",
+                    "admin",
+                    "Admin/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                    "default", "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+            });
 
             app.UseSwagger();
             app.UseSwaggerUI(x=>
             {
                 x.SwaggerEndpoint("/swagger/v1/swagger.json", "Tournament API v1");
-            });
-
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

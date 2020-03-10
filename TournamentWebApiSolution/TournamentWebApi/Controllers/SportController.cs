@@ -28,6 +28,9 @@ namespace TournamentWebApi.Controllers
         /// <param name="model"></param>
         /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> AddSportAsync(SportContractModel model)
         {
             try
@@ -46,6 +49,9 @@ namespace TournamentWebApi.Controllers
         /// </summary>
         /// <returns>Sport Data</returns>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<IEnumerable<SportContractModel>>> GetAllSportAsync()
         {
             try
@@ -68,6 +74,9 @@ namespace TournamentWebApi.Controllers
         /// <param name="id"></param>
         /// <returns>Sport Data</returns>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<SportContractModel>> GetSportAsync(int id)
         {
             try
@@ -89,6 +98,9 @@ namespace TournamentWebApi.Controllers
         /// <param name="model"></param>
         /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
         [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> UpdateSportAsync(SportContractModel model)
         {
             try
@@ -111,6 +123,9 @@ namespace TournamentWebApi.Controllers
         /// <param name="id">integer</param>
         /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteSportAsync(int id)
         {
             try

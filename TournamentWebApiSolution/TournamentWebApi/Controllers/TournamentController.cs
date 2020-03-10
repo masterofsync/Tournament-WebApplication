@@ -29,6 +29,9 @@ namespace TournamentWebApi.Controllers
         /// <param name="model">TournamentType model</param>
         /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
         [HttpPost("type")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> AddTypeAsync(TournamentTypeContractModel model)
         {
             try
@@ -48,6 +51,9 @@ namespace TournamentWebApi.Controllers
         /// <param name="id"></param>
         /// <returns>TournamentType Model</returns>
         [HttpGet("type/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<TournamentTypeContractModel>> GetTypeAsync(int id)
         {
             try
@@ -66,6 +72,9 @@ namespace TournamentWebApi.Controllers
         /// </summary>
         /// <returns>List of TournamentType model</returns>
         [HttpGet("Type")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<IEnumerable<TournamentTypeContractModel>>> GetAllTypeAsync()
         {
             try
@@ -85,6 +94,9 @@ namespace TournamentWebApi.Controllers
         /// <param name="id">integer</param>
         /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
         [HttpDelete("Type/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteTypeAsync(int id)
         {
             try
@@ -103,6 +115,9 @@ namespace TournamentWebApi.Controllers
         /// <param name="model">Tournament type model</param>
         /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
         [HttpPut("Type")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> UpdateTypeAsync(TournamentTypeContractModel model)
         {
             try

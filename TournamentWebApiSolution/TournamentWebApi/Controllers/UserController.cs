@@ -44,6 +44,9 @@ namespace TournamentWebApi.Controllers
 
         [HttpPost]
         [Route("Test")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
         public IActionResult Test(UserLoginModel test)
         {
             if(test!=null) return Ok();
