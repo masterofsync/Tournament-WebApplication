@@ -10,9 +10,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using TournamentWebApi.Data;
+using TournamentWebApi.Models;
 
 namespace TournamentWebApi.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class TokenController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -26,13 +29,12 @@ namespace TournamentWebApi.Controllers
             this._config = config;
         }
 
-        [Route("/token")]
         [HttpPost]
-        public async Task<IActionResult> Create(string username, string password, string grant_type)
+        public async Task<IActionResult> Create(UserLoginInfoModel model)
         {
-            if (await IsValidUsernameAndPassword(username, password))
+            if (await IsValidUsernameAndPassword(model.username, model.password))
             {
-                return new ObjectResult(await GenerateToken(username));
+                return new ObjectResult(await GenerateToken(model.username));
             }
             else
             {

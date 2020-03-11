@@ -11,7 +11,7 @@ namespace TournamentWebApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class TeamController : ControllerBase
+    public class TeamsController : ControllerBase
     {
     }
 }

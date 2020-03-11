@@ -38,8 +38,8 @@ namespace TournamentWebApi
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddTransient<ISportRepository, SportRepository>();
-            services.AddTransient<ITournamentRepository, TournamentRepository>();
+            services.AddTransient<ISportsRepository, SportsRepository>();
+            services.AddTransient<ITournamentsRepository, TournamentsRepository>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(

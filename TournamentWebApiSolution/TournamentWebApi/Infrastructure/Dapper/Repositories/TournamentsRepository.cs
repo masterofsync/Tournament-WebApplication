@@ -8,9 +8,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
-    public class TournamentRepository : Repository, ITournamentRepository
+    public class TournamentsRepository : Repository, ITournamentsRepository
     {
-        public TournamentRepository(IConfiguration config) : base(config)
+        public TournamentsRepository(IConfiguration config) : base(config)
         {
 
         }
@@ -21,7 +21,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.StartTransaction();
 
-                string insertQuery = @"INSERT INTO [dbo].[TournamentType]([Name],[Description]) VALUES (@Name,@Description)";
+                string insertQuery = @"INSERT INTO [dbo].[TournamentTypes]([Name],[Description]) VALUES (@Name,@Description)";
 
                 var rowsAffected = await this.SaveDataInTransactionUsingQueryAsync(insertQuery, model);
 
@@ -45,7 +45,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.StartTransaction();
 
-                string deleteQuery = @"DELETE FROM [dbo].[TournamentType] WHERE TournamentTypeId = @Id";
+                string deleteQuery = @"DELETE FROM [dbo].[TournamentTypes] WHERE TournamentTypeId = @Id";
 
                 var rowsAffected = await SaveDataInTransactionUsingQueryAsync(deleteQuery, new { Id = id });
                 this.CommitTransaction();
@@ -69,7 +69,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.StartTransaction();
 
-                var getAllTypeQuery = @"SELECT * FROM [dbo].[TournamentType]";
+                var getAllTypeQuery = @"SELECT * FROM [dbo].[TournamentTypes]";
 
                 var result = await LoadDataInTransactionUsingQueryAsync<TournamentTypeContractModel, dynamic>(getAllTypeQuery, null);
 
@@ -91,7 +91,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.StartTransaction();
 
-                string getQuery = @"SELECT * FROM [dbo].[TournamentType] WHERE TournamentTypeId=@Id";
+                string getQuery = @"SELECT * FROM [dbo].[TournamentTypes] WHERE TournamentTypeId=@Id";
 
                 var result = await LoadSingleDataInTransactionUsingQueryAsync<TournamentTypeContractModel,dynamic>(getQuery,new { Id = id });
 
@@ -112,7 +112,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.StartTransaction();
 
-                string updateQuery = @"UPDATE [dbo].[TournamentType] SET Name=@Name,Description=@Description WHERE TournamentTypeId=@TournamentTypeId";
+                string updateQuery = @"UPDATE [dbo].[TournamentTypes] SET Name=@Name,Description=@Description WHERE TournamentTypeId=@TournamentTypeId";
 
                 var rowsAffected = await this.SaveDataInTransactionUsingQueryAsync(updateQuery, model);
 

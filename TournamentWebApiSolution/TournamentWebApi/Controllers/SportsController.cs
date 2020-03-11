@@ -13,11 +13,11 @@ namespace TournamentWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
-    public class SportController : ControllerBase
+    [Authorize]
+    public class SportsController : ControllerBase
     {
-        private readonly ISportRepository sportRepo;
-        public SportController(ISportRepository sportRepo)
+        private readonly ISportsRepository sportRepo;
+        public SportsController(ISportsRepository sportRepo)
         {
             this.sportRepo = sportRepo;
         }

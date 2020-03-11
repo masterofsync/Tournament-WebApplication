@@ -13,10 +13,10 @@ namespace TournamentWebApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     //[Authorize]
-    public class TournamentController : ControllerBase
+    public class TournamentsController : ControllerBase
     {
-        private readonly ITournamentRepository tournamentRepo;
-        public TournamentController(ITournamentRepository repo)
+        private readonly ITournamentsRepository tournamentRepo;
+        public TournamentsController(ITournamentsRepository repo)
         {
             tournamentRepo = repo;
         }
