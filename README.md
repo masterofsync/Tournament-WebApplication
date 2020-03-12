@@ -1,4 +1,4 @@
-##### Tournament Web Application
+#### Tournament Web Application
 
 Web Application for creating tournaments.
 
@@ -9,4 +9,3 @@ Technologies used:
 - AspNetCore Versioning              
 - Swagger
 - Fiddler
-
