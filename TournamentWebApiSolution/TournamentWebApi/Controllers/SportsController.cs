@@ -13,7 +13,9 @@ namespace TournamentWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
+    [ApiVersion("1.0")]
+    [ApiVersion("1.1")]
     public class SportsController : ControllerBase
     {
         private readonly ISportsRepository sportRepo;
@@ -74,10 +76,27 @@ namespace TournamentWebApi.Controllers
         /// <param name="id"></param>
         /// <returns>Sport Data</returns>
         [HttpGet("{id}")]
+        [MapToApiVersion("1.1")]
+        public async Task<ActionResult<SportContractModel>> GetSportAsync(int id)
+        {
+            try
+            {
+                var model = await sportRepo.GetSportAsync(id);
+                model.Name=null;
+                return model;
+            }
+            catch (Exception)
+            {
+                // Log??
+                return BadRequest("test");
+            }
+        }
+
+        [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesDefaultResponseType]
-        public async Task<ActionResult<SportContractModel>> GetSportAsync(int id)
+        [MapToApiVersion("1.0")]
+        public async Task<ActionResult<SportContractModel>> GetSportAsyncVersion1(int id)
         {
             try
             {
