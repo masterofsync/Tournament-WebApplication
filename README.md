@@ -1,8 +1,11 @@
 # Tournament Web Application
-Created by Bikesh Maharjan
 
 Web Application for creating tournaments.
 
 Technologies used:
-- ASP.NET CORE
+- ASP.NET CORE APIs                                - Dapper
+- AspNetCore Versioning                            - Azure MSSQL Database
+
+- Swagger
+- Fiddler
 
