@@ -5,7 +5,6 @@ Web Application for creating tournaments.
 Technologies used:
 - ASP.NET CORE APIs                  
 - Dapper
-- Azure MSSQL Database
-- AspNetCore Versioning              
+- Azure MSSQL Database             
 - Swagger
 - Fiddler
