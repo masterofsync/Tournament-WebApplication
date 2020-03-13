@@ -13,7 +13,7 @@ using TournamentWebApi.Models;
 
 namespace TournamentWebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]s")]
     [ApiController]
     //[Authorize]
     public class UserController : ControllerBase

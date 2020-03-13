@@ -11,15 +11,15 @@ using System.Net;
 
 namespace TournamentWebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]s")]
     [ApiController]
     //[Authorize]
-    [ApiVersion("1.0")]
-    [ApiVersion("1.1")]
-    public class SportsController : ControllerBase
+    //[ApiVersion("1.0")]
+    //[ApiVersion("1.1")]
+    public class SportController : ControllerBase
     {
         private readonly ISportsRepository sportRepo;
-        public SportsController(ISportsRepository sportRepo)
+        public SportController(ISportsRepository sportRepo)
         {
             this.sportRepo = sportRepo;
         }
@@ -76,7 +76,7 @@ namespace TournamentWebApi.Controllers
         /// <param name="id"></param>
         /// <returns>Sport Data</returns>
         [HttpGet("{id}")]
-        [MapToApiVersion("1.1")]
+        //[MapToApiVersion("1.1")]
         public async Task<ActionResult<SportContractModel>> GetSportAsync(int id)
         {
             try
@@ -92,24 +92,24 @@ namespace TournamentWebApi.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [MapToApiVersion("1.0")]
-        public async Task<ActionResult<SportContractModel>> GetSportAsyncVersion1(int id)
-        {
-            try
-            {
-                var model = await sportRepo.GetSportAsync(id);
+        //[HttpGet("{id}")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        ////[MapToApiVersion("1.0")]
+        //public async Task<ActionResult<SportContractModel>> GetSportAsyncVersion1(int id)
+        //{
+        //    try
+        //    {
+        //        var model = await sportRepo.GetSportAsync(id);
 
-                return model;
-            }
-            catch (Exception)
-            {
-                // Log??
-                return BadRequest();
-            }
-        }
+        //        return model;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        // Log??
+        //        return BadRequest();
+        //    }
+        //}
 
         /// <summary>
         /// PUT: api/Sport. Update a given sport.

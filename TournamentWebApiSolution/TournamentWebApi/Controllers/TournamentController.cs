@@ -10,13 +10,13 @@ using TournamentWebApi.Infrastructure.Dapper.Repositories;
 
 namespace TournamentWebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]s")]
     [ApiController]
     //[Authorize]
-    public class TournamentsController : ControllerBase
+    public class TournamentController : ControllerBase
     {
         private readonly ITournamentsRepository tournamentRepo;
-        public TournamentsController(ITournamentsRepository repo)
+        public TournamentController(ITournamentsRepository repo)
         {
             tournamentRepo = repo;
         }

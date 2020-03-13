@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TournamentWebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]s")]
     [ApiController]
     [Authorize]
-    public class TeamsController : ControllerBase
+    public class TeamController : ControllerBase
     {
     }
 }
