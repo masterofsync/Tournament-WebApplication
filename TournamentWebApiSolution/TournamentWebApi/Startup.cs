@@ -83,17 +83,17 @@ namespace TournamentWebApi
             services.AddControllersWithViews();
             services.AddRazorPages();
 
-            services.AddApiVersioning(cfg =>
-            {
-                cfg.DefaultApiVersion = new ApiVersion(1, 1);
-                cfg.AssumeDefaultVersionWhenUnspecified = true;
-                cfg.ReportApiVersions = true;
-                //cfg.ApiVersionReader = new QueryStringApiVersionReader(); // Query based which is default
-                //cfg.ApiVersionReader = new HeaderApiVersionReader("X-Version"); // On header
-                cfg.ApiVersionReader = ApiVersionReader.Combine(
-                    new HeaderApiVersionReader("X-Version"),
-                    new QueryStringApiVersionReader("v"));// On header and query
-            });
+            //services.AddApiVersioning(cfg =>
+            //{
+            //    cfg.DefaultApiVersion = new ApiVersion(1, 1);
+            //    cfg.AssumeDefaultVersionWhenUnspecified = true;
+            //    cfg.ReportApiVersions = true;
+            //    //cfg.ApiVersionReader = new QueryStringApiVersionReader(); // Query based which is default
+            //    //cfg.ApiVersionReader = new HeaderApiVersionReader("X-Version"); // On header
+            //    cfg.ApiVersionReader = ApiVersionReader.Combine(
+            //        new HeaderApiVersionReader("X-Version"),
+            //        new QueryStringApiVersionReader("v"));// On header and query
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
