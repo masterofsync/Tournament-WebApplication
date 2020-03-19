@@ -25,7 +25,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
                 this.StartTransaction();
 
                 string insertQuery = @"INSERT INTO [dbo].[Sports]([Name], [Description]) VALUES (@Name, @Description)";
-                // save the team model
+                // save the sport model
                 var rowsAffected = await this.SaveDataInTransactionUsingQueryAsync(insertQuery, model);
 
                 this.CommitTransaction();
@@ -82,7 +82,6 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 
                 string getQuery = @"SELECT * FROM [dbo].[Sports] WHERE SportId = @Id";
 
-                // save the team model
                 var result = await LoadSingleDataInTransactionUsingQueryAsync<SportContractModel, dynamic>(getQuery, new { Id = id });
 
                 this.CommitTransaction();
