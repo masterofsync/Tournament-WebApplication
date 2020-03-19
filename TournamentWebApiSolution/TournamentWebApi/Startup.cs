@@ -42,6 +42,7 @@ namespace TournamentWebApi
 
             services.AddTransient<ISportsRepository, SportsRepository>();
             services.AddTransient<ITournamentsRepository, TournamentsRepository>();
+            services.AddTransient<ITeamsRepository, TeamsRepository>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
@@ -80,7 +81,11 @@ namespace TournamentWebApi
                     });
             });
 
-            services.AddControllersWithViews();
+            services.AddControllersWithViews(options=>
+            {
+                options.Filters.Add(typeof(ValidateModelStateAttribute));
+            });
+
             services.AddRazorPages();
 
             //services.AddApiVersioning(cfg =>
@@ -135,6 +140,17 @@ namespace TournamentWebApi
             {
                 x.SwaggerEndpoint("/swagger/v1/swagger.json", "Tournament API v1");
             });
+        }
+
+        public class ValidateModelStateAttribute : ActionFilterAttribute
+        {
+            public override void OnActionExecuting(ActionExecutingContext context)
+            {
+                if (!context.ModelState.IsValid)
+                {
+                    context.Result = new BadRequestObjectResult(context.ModelState);
+                }
+            }
         }
     }
 }
