@@ -18,11 +18,11 @@ namespace TournamentWebApi.Controllers
     public class HomeController : Controller
     {
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUserFromIdentityModel> _userManager;
 
         private readonly string BaseUri = "https://localhost:5001/api/";
 
-        public HomeController(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
+        public HomeController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUserFromIdentityModel> userManager)
         {
             this._roleManager = roleManager;
             this._userManager = userManager;

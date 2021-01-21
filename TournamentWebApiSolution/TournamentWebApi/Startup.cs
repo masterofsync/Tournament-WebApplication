@@ -18,6 +18,8 @@ using System.Text;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.Mvc.Filters;
+using TournamentWebApi.Models;
 
 namespace TournamentWebApi
 {
@@ -46,10 +48,13 @@ namespace TournamentWebApi
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    //Configuration.GetConnectionString("DefaultConnection")));
-                    Configuration["AzureTournamentDBCOnnection"]));
-            services.AddDefaultIdentity<IdentityUser>()
-                .AddRoles<IdentityRole>()
+                    Configuration.GetConnectionString("DefaultConnection")));
+            //Configuration["AzureTournamentDBCOnnection"]));
+            //services.AddDefaultIdentity<IdentityUser>()
+            //    .AddRoles<IdentityRole>()
+            //    .AddEntityFrameworkStores<ApplicationDbContext>();      
+            
+            services.AddIdentity<ApplicationUserFromIdentityModel, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddAuthentication(options =>

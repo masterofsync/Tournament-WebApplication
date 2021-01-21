@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -10,6 +11,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TournamentWebApi.Data;
 using TournamentWebApi.Models;
+using Contract.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace TournamentWebApi.Controllers
 {
@@ -27,27 +30,87 @@ namespace TournamentWebApi.Controllers
             this._userManager = userManager;
         }
 
-        [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        //[HttpGet]
+        //public ActionResult<IEnumerable<string>> Get()
+        //{
+        //    return Ok(new UserLoginModel() { firstName="test"});
+        //}
+
+
+        /// <summary>
+        /// Register User
+        /// </summary>
+        /// <param name="userModel"></param>
+        /// <returns></returns>
+        // POST api/User
+        [AllowAnonymous]
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Register(RegisterUserContractModel userModel)
         {
-            return Ok(new UserLoginModel() { firstName="test"});
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var user = new ApplicationUserFromIdentityModel
+                {
+                    UserName = userModel.UserName,
+                    Email = userModel.Email,
+                    FirstName = userModel.FirstName,
+                    LastName = userModel.LastName,
+                    PhoneNumber = userModel.PhoneNumber,
+                    CreatedOn = DateTime.Now,
+                    UpdatedOn = DateTime.Now
+                };
+
+                IdentityResult result = await _userManager.CreateAsync(user, userModel.Password);
+
+                if (!result.Succeeded)
+                {
+                    return GetErrorResult(result);
+                }
+
+                // return specifics?
+                // return Created();
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
         }
 
-        //[HttpGet]
-        //public UserModel GetById()
-        //{
-        //    string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //    UserData data = new UserData();
+        //TO DO:
+        // Login
+        // Log out
+        //
 
-        //    return data.GetUserById(userId).First(); 
-        //}
+
+        [HttpGet]
+        public async Task<ApplicationUserModel> GetByUserName()
+        
+        {
+            string userName = "Bikesh707@gmail.com";
+            var user = await _userManager.FindByEmailAsync(userName);
+            //UserData data = new UserData();
+            //var name = _context.Users.Find(userName);
+            //var user = await _userManager.GetUserName(userName);
+            return new ApplicationUserModel() { Email=user.Email,Id=user.Id};
+            //return Ok(/*user.NormalizedEmail*/);
+        }
 
         [HttpPost]
         [Route("Test")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]
-        public IActionResult Test(UserLoginModel test)
+        public IActionResult Test(RegisterUserContractModel test)
         {
             if(test!=null) return Ok();
 
@@ -117,6 +180,36 @@ namespace TournamentWebApi.Controllers
         {
             var user = await _userManager.FindByIdAsync(pairing.UserId);
             await _userManager.RemoveFromRoleAsync(user, pairing.RoleName);
+        }
+
+
+        private IActionResult GetErrorResult(IdentityResult result)
+        {
+            if (result == null)
+            {
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
+
+            if (!result.Succeeded)
+            {
+                if (result.Errors != null)
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
+
+                if (ModelState.IsValid)
+                {
+                    // No ModelState errors are available to send, so just return an empty BadRequest.
+                    return BadRequest();
+                }
+
+                return BadRequest(ModelState);
+            }
+
+            return null;
         }
     }
 }
