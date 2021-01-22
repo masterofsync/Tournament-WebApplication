@@ -13,6 +13,9 @@ using TournamentWebApi.Data;
 using TournamentWebApi.Models;
 using Contract.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Web;
+using System.Net.Mail;
+using Microsoft.Extensions.Configuration;
 
 namespace TournamentWebApi.Controllers
 {
@@ -22,12 +25,14 @@ namespace TournamentWebApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUserFromIdentityModel> _userManager;
+        private readonly IConfiguration _config;
 
-        public UserController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public UserController(ApplicationDbContext context, UserManager<ApplicationUserFromIdentityModel> userManager, IConfiguration config)
         {
             _context = context;
             this._userManager = userManager;
+            this._config = config;
         }
 
         //[HttpGet]
@@ -36,6 +41,7 @@ namespace TournamentWebApi.Controllers
         //    return Ok(new UserLoginModel() { firstName="test"});
         //}
 
+        #region User Registration and Confirmation
 
         /// <summary>
         /// Register User
@@ -86,6 +92,143 @@ namespace TournamentWebApi.Controllers
             }
         }
 
+        //[AllowAnonymous]
+        //[HttpPost("{userId}/[action]")]
+        /// <summary>
+        /// Get confirmation code given registered email.
+        /// </summary>
+        /// <param name="email">Registered email of user.</param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        private async Task<string> GetConfirmationCode(string email)
+        {
+            try
+            {
+                ApplicationUserFromIdentityModel user = await _userManager.FindByEmailAsync(email);
+
+                if (user != null)
+                {
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    return code;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+        }
+
+        [AllowAnonymous]
+        //[HttpPost("{userId}/[action]")]
+        [HttpPost("[action]")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> SendEmailAddressConfirmation(string email)
+        {
+            try
+            {
+                var newCode = await this.GetConfirmationCode(email);
+                ApplicationUserFromIdentityModel user = await _userManager.FindByEmailAsync(email);
+
+                if (user != null && newCode != null)
+                {
+                    // TODO: think about better way to set up URL (i.e. not hardcoded ...)
+                    var callbackUrl = Url.Action("ConfirmEmail", "api/Users", new { userId = user.Id, code = newCode }, protocol: Url.ActionContext.HttpContext.Request.Scheme);
+
+                    var newModel = new EmailContractModel()
+                    {
+                        Email = email,
+                        Content = "Please confirm your account by clicking this link: <a href=\"" + callbackUrl + "\">link</a>"
+                    };
+
+                    if (newCode != null && user.Id != null)
+                    {
+                        return SendEmail(newModel);
+                    }
+                }
+                return NotFound(email); // safe to send not found email??
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [AllowAnonymous]
+        //[HttpPost("[action]")]
+        [Route("ConfirmEmail")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        {
+            try
+            {
+                ApplicationUserFromIdentityModel user = await _userManager.FindByIdAsync(userId);
+
+                if (user != null)
+                {
+                    var result = await _userManager.ConfirmEmailAsync(user, code);
+
+                    if (result.Succeeded)
+                        return Ok();
+                }
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+        #endregion
+
+        /// <summary>
+        /// Send Email
+        /// </summary>
+        /// <param name="model">EmailContractModel</param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("[action]")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IActionResult SendEmail(EmailContractModel model)
+        {
+            try
+            {
+                if (model != null)
+                {
+                    MailMessage mail = new MailMessage();
+                    mail.To.Add(model.Email);
+                    mail.From = new MailAddress(_config["Email"]);
+                    mail.Subject = model.Subject;
+                    string Body = model.Content;
+                    mail.Body = Body;
+                    mail.IsBodyHtml = true;
+                    SmtpClient smtp = new SmtpClient();
+                    smtp.Host = "smtp.gmail.com";
+                    smtp.Port = 587;
+                    smtp.UseDefaultCredentials = false;
+                    smtp.Credentials = new System.Net.NetworkCredential
+                        (_config["Email"], _config["Password"]); // TODO: setup new user pass 
+                    smtp.EnableSsl = true;
+                    smtp.Send(mail);
+                    return Ok();
+                }
+                return BadRequest("Model is null!");
+            }
+            catch (Exception)
+            {
+                return BadRequest("Model is null!");
+            }
+        }
+
         //TO DO:
         // Login
         // Log out
@@ -94,14 +237,14 @@ namespace TournamentWebApi.Controllers
 
         [HttpGet]
         public async Task<ApplicationUserModel> GetByUserName()
-        
+
         {
-            string userName = "Bikesh707@gmail.com";
+            string userName = "test@gmail.com";
             var user = await _userManager.FindByEmailAsync(userName);
             //UserData data = new UserData();
             //var name = _context.Users.Find(userName);
             //var user = await _userManager.GetUserName(userName);
-            return new ApplicationUserModel() { Email=user.Email,Id=user.Id};
+            return new ApplicationUserModel() { Email = user.Email, Id = user.Id };
             //return Ok(/*user.NormalizedEmail*/);
         }
 
@@ -112,7 +255,7 @@ namespace TournamentWebApi.Controllers
         [ProducesDefaultResponseType]
         public IActionResult Test(RegisterUserContractModel test)
         {
-            if(test!=null) return Ok();
+            if (test != null) return Ok();
 
             return BadRequest();
         }

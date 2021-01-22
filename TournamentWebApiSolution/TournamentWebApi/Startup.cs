@@ -55,7 +55,7 @@ namespace TournamentWebApi
             //    .AddEntityFrameworkStores<ApplicationDbContext>();      
             
             services.AddIdentity<ApplicationUserFromIdentityModel, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
             services.AddAuthentication(options =>
             {
