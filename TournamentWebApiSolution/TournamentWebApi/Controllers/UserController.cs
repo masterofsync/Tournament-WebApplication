@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Web;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
+using System.Text;
+using Contract.Models.UserModels;
 
 namespace TournamentWebApi.Controllers
 {
@@ -34,12 +36,6 @@ namespace TournamentWebApi.Controllers
             this._userManager = userManager;
             this._config = config;
         }
-
-        //[HttpGet]
-        //public ActionResult<IEnumerable<string>> Get()
-        //{
-        //    return Ok(new UserLoginModel() { firstName="test"});
-        //}
 
         #region User Registration and Confirmation
 
@@ -92,68 +88,36 @@ namespace TournamentWebApi.Controllers
             }
         }
 
-        //[AllowAnonymous]
-        //[HttpPost("{userId}/[action]")]
+
         /// <summary>
-        /// Get confirmation code given registered email.
+        /// Get confirmation code given registered email and password.
         /// </summary>
-        /// <param name="email">Registered email of user.</param>
+        /// <param name="model"></param>
         /// <returns></returns>
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        private async Task<string> GetConfirmationCode(string email)
-        {
-            try
-            {
-                ApplicationUserFromIdentityModel user = await _userManager.FindByEmailAsync(email);
-
-                if (user != null)
-                {
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    return code;
-                }
-                return null;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-
-        }
-
         [AllowAnonymous]
-        //[HttpPost("{userId}/[action]")]
         [HttpPost("[action]")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> SendEmailAddressConfirmation(string email)
+        public async Task<IActionResult> GetConfirmationCode(UserContractUserModel model)
         {
             try
             {
-                var newCode = await this.GetConfirmationCode(email);
-                ApplicationUserFromIdentityModel user = await _userManager.FindByEmailAsync(email);
-
-                if (user != null && newCode != null)
+                if (model != null & model.Email != null)
                 {
-                    // TODO: think about better way to set up URL (i.e. not hardcoded ...)
-                    var callbackUrl = Url.Action("ConfirmEmail", "api/Users", new { userId = user.Id, code = newCode }, protocol: Url.ActionContext.HttpContext.Request.Scheme);
+                    ApplicationUserFromIdentityModel user = await _userManager.FindByEmailAsync(model.Email);
 
-                    var newModel = new EmailContractModel()
+                    if (user != null)
                     {
-                        Email = email,
-                        Content = "Please confirm your account by clicking this link: <a href=\"" + callbackUrl + "\">link</a>"
-                    };
-
-                    if (newCode != null && user.Id != null)
-                    {
-                        return SendEmail(newModel);
+                        var checkUserPassword = await _userManager.CheckPasswordAsync(user, model.Password);
+                        if (checkUserPassword)
+                        {
+                            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                            return Ok(code);
+                        }
                     }
                 }
-                return NotFound(email); // safe to send not found email??
+                return BadRequest();
             }
             catch (Exception)
             {
@@ -162,8 +126,8 @@ namespace TournamentWebApi.Controllers
         }
 
         [AllowAnonymous]
-        //[HttpPost("[action]")]
-        [Route("ConfirmEmail")]
+        [HttpPost]
+        [Route("[action]")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -172,13 +136,17 @@ namespace TournamentWebApi.Controllers
             try
             {
                 ApplicationUserFromIdentityModel user = await _userManager.FindByIdAsync(userId);
+                if (user.EmailConfirmed)
+                {
+                    return Ok("Email already Confirmed!");
+                }
 
                 if (user != null)
                 {
                     var result = await _userManager.ConfirmEmailAsync(user, code);
 
                     if (result.Succeeded)
-                        return Ok();
+                        return Ok("Confirmed");
                 }
                 return NotFound();
             }
@@ -188,6 +156,63 @@ namespace TournamentWebApi.Controllers
             }
         }
         #endregion
+
+        /// <summary>
+        /// Change password by currently logged on user.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost("ChangePassword")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> ChangePassword(ChangePasswordContractUserModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            IdentityResult result = await _userManager.ChangePasswordAsync(await _userManager.FindByIdAsync(userId), model.OldPassword,
+                model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                return GetErrorResult(result);
+            }
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Get forgot Code to reset password.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpGet("GetForgotPasswordCode")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetForgotPasswordCode(string email)
+        {
+            var model = new ForgotPasswordContractUserModel();
+            if (ModelState.IsValid)
+            {
+                ApplicationUserFromIdentityModel user = await _userManager.FindByEmailAsync(email);
+
+                if (user != null)
+                {
+                    var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    model.Code = HttpUtility.UrlEncode(code);
+                    model.Email = email;
+                    return Ok(code);
+                }
+                return NotFound();
+            }
+            return BadRequest();
+        }
 
         /// <summary>
         /// Send Email
@@ -229,45 +254,44 @@ namespace TournamentWebApi.Controllers
             }
         }
 
+        // External Login (gmail??)
+
+
         //TO DO:
-        // Login
-        // Log out
-        //
+        // Reset Password
+        // Forgot Password
 
-
-        [HttpGet]
-        public async Task<ApplicationUserModel> GetByUserName()
-
-        {
-            string userName = "test@gmail.com";
-            var user = await _userManager.FindByEmailAsync(userName);
-            //UserData data = new UserData();
-            //var name = _context.Users.Find(userName);
-            //var user = await _userManager.GetUserName(userName);
-            return new ApplicationUserModel() { Email = user.Email, Id = user.Id };
-            //return Ok(/*user.NormalizedEmail*/);
-        }
-
+        #region Admin
+        /// <summary>
+        /// Reset Password for user. 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        [Route("Test")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [Route("api/User/Admin/ResetPassword")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesDefaultResponseType]
-        public IActionResult Test(RegisterUserContractModel test)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> ResetPassword(ResetPasswordContractUserModel model)
         {
-            if (test != null) return Ok();
-
-            return BadRequest();
+            if (ModelState.IsValid)
+            {
+                if (model.UserId != null)
+                {
+                    ApplicationUserFromIdentityModel user = await _userManager.FindByIdAsync(model.UserId);
+                    var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+                    if (!result.Succeeded)
+                    {
+                        return GetErrorResult(result);
+                    }
+                    return Ok();
+                }
+                return NotFound();
+            }
+            return BadRequest(ModelState);
         }
 
-        //[HttpPost]
-        //public ActionResult TestMethod(string firstName)
-        //{
-        //    // Do something with username and password
-        //    var user = firstName;
-        //    //var passWord = password;
-        //    return null;
-        //}
 
         [Authorize(Roles = "Admin")]
         [HttpGet]
@@ -325,6 +349,7 @@ namespace TournamentWebApi.Controllers
             await _userManager.RemoveFromRoleAsync(user, pairing.RoleName);
         }
 
+        #endregion
 
         private IActionResult GetErrorResult(IdentityResult result)
         {

@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace Contract.Models
+namespace Contract.Models.UserModels
 {
-    public class UserConfirmationContractModel
+    public class ForgotPasswordContractUserModel
     {
+        [Required]
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
-
-        [Display(Name = "UserId")]
-        public string UserId { get; set; }
 
         public string Code { get; set; }
     }
