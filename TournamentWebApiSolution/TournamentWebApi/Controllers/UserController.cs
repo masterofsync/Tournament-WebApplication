@@ -172,10 +172,11 @@ namespace TournamentWebApi.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            IdentityResult result = await _userManager.ChangePasswordAsync(await _userManager.FindByIdAsync(userId), model.OldPassword,
-                model.NewPassword);
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+
+            IdentityResult result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
 
             if (!result.Succeeded)
             {
@@ -254,12 +255,7 @@ namespace TournamentWebApi.Controllers
             }
         }
 
-        // External Login (gmail??)
-
-
-        //TO DO:
-        // Reset Password
-        // Forgot Password
+        // TODO: External Login (gmail??)
 
         #region Admin
         /// <summary>

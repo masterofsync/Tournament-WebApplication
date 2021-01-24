@@ -23,9 +23,12 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         {
             try
             {
+                var teamStatsId = await CreateDefaultTeamStats();
                 this.StartTransaction();
 
-                string insertQuery = @"INSERT INTO [dbo].[Team]([Name], [Description], [SportId], [TeamStatsId],[UserId]) VALUES (@Name, @Description, @SportId, @TeamStatsId,@UserId)";
+                model.TeamStatsId = teamStatsId;
+
+                string insertQuery = @"INSERT INTO [dbo].[Team]([Name], [Description], [TeamStatsId],[UserId]) VALUES (@Name, @Description, @TeamStatsId,@UserId)";
                 // save the team model
                 var rowsAffected = await this.SaveDataInTransactionUsingQueryAsync(insertQuery, model);
 
@@ -112,7 +115,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.StartTransaction();
 
-                string updateQuery = @"UPDATE [dbo].[Team] SET Name=@Name, Description=@Description,SportId=@SportId WHERE TeamId=@TeamId";
+                string updateQuery = @"UPDATE [dbo].[Team] SET Name=@Name, Description=@Description WHERE TeamId=@TeamId";
 
                 var rowsAffected = await this.SaveDataInTransactionUsingQueryAsync(updateQuery, model);
 
@@ -131,7 +134,12 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             }
         }
 
-        public async Task<IEnumerable<TeamContractModel>> GetAllTeamsForUser(int userId)
+        /// <summary>
+        /// Get all team related to user.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<TeamContractModel>> GetAllTeamsForUser(string userId)
         {
             try
             {
@@ -153,19 +161,26 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             }
         }
 
-        public async Task<IEnumerable<TeamContractModel>> GetAllTeamsForUserAndSport(int userId, int sportId)
+        /// <summary>
+        /// Get all team related to user.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<int> CreateDefaultTeamStats()
         {
             try
             {
+                var defaultTeamStatsModel = new TeamStatsContractModel() { Draw = 0, goalsFor = 0, goalsAgainst = 0, Loss = 0, matchesPlayed = 0, Wins = 0 };
                 this.StartTransaction();
 
-                string getQuery = @"SELECT * FROM [dbo].[Team] WHERE UserId=@UserId AND SportId=@SportId";
+                string insertQuery = @"INSERT INTO [dbo].[TeamStats]([Wins], [Loss], [Draw],[matchesPlayed],[goalsFor],[goalsAgainst]) VALUES (@Wins, @Loss, @Draw, @matchesPlayed, @goalsFor, @goalsAgainst); SELECT CAST(SCOPE_IDENTITY() as int)";
 
                 // save the team model
-                var result = await LoadDataInTransactionUsingQueryAsync<TeamContractModel, dynamic>(getQuery, new { UserId = userId, SportId = sportId });
+                var TeamStatsId = await this.SaveDataInTransactionAndGetIdAsync(insertQuery, defaultTeamStatsModel);
 
                 this.CommitTransaction();
-                return result;
+
+                return TeamStatsId;
             }
             catch (Exception)
             {
@@ -174,5 +189,33 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
                 throw;
             }
         }
+
+        ///// <summary>
+        ///// Get all teams for given user and sport.
+        ///// </summary>
+        ///// <param name="userId"></param>
+        ///// <param name="sportId"></param>
+        ///// <returns></returns>
+        //public async Task<IEnumerable<TeamContractModel>> GetAllTeamsForUserAndSport(int userId, int sportId)
+        //{
+        //    try
+        //    {
+        //        this.StartTransaction();
+
+        //        string getQuery = @"SELECT * FROM [dbo].[Team] WHERE UserId=@UserId AND SportId=@SportId";
+
+        //        // save the team model
+        //        var result = await LoadDataInTransactionUsingQueryAsync<TeamContractModel, dynamic>(getQuery, new { UserId = userId, SportId = sportId });
+
+        //        this.CommitTransaction();
+        //        return result;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        this.RollbackTransaction();
+        //        //return false; ??
+        //        throw;
+        //    }
+        //}
     }
 }

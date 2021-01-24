@@ -33,7 +33,8 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         /// <returns>SqlConnection type</returns>
         private SqlConnection SqlConnection()
         {
-            return new SqlConnection(Configuration["AzureTournamentDBCOnnection"]);
+            //return new SqlConnection(Configuration["AzureTournamentDBCOnnection"]);
+            return new SqlConnection(Configuration.GetConnectionString("DefaultConnection"));
         }
 
         /// <summary>
@@ -70,9 +71,16 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         /// <returns></returns>
         public async Task<IEnumerable<T>> LoadDataInTransactionUsingQueryAsync<T, U>(string sqlQuery, U parameters)
         {
-            var rows = await _connection.QueryAsync<T>(sqlQuery, parameters,
-                            commandType: CommandType.Text, transaction: _transaction);
-            return rows;
+            try
+            {
+                var rows = await _connection.QueryAsync<T>(sqlQuery, parameters,
+                                  commandType: CommandType.Text, transaction: _transaction);
+                return rows;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         /// <summary>
@@ -85,9 +93,16 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         /// <returns></returns>
         public async Task<T> LoadSingleDataInTransactionUsingQueryAsync<T, U>(string sqlQuery, U parameters)
         {
-            var row = await _connection.QuerySingleOrDefaultAsync<T>(sqlQuery, parameters,
-                            commandType: CommandType.Text, transaction: _transaction);
-            return row;
+            try
+            {
+                var row = await _connection.QuerySingleOrDefaultAsync<T>(sqlQuery, parameters,
+                                  commandType: CommandType.Text, transaction: _transaction);
+                return row;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         /// <summary>
@@ -99,9 +114,38 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         /// <returns>Int: if greater than 0, sucessfully saved/updated</returns>
         public async Task<int> SaveDataInTransactionUsingQueryAsync<T>(string sqlQuery, T parameters)
         {
-            return await _connection.ExecuteAsync(sqlQuery, parameters,
-                                commandType: CommandType.Text, transaction: _transaction);
+            try
+            {
+                return await _connection.ExecuteAsync(sqlQuery, parameters,
+                                   commandType: CommandType.Text, transaction: _transaction);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
+
+        /// <summary>
+        /// Save data to the transaction and get Id.
+        /// </summary>
+        /// <typeparam name="T">Parameters type</typeparam>
+        /// <param name="sqlQuery">Sql query as String</param>
+        /// <param name="parameters">parameters related to the sql query</param>
+        /// <returns>Int: if greater than 0, sucessfully saved/updated</returns>
+        public async Task<int> SaveDataInTransactionAndGetIdAsync<T>(string sqlQuery, T parameters)
+        {
+            try
+            {
+                return await _connection.QuerySingleOrDefaultAsync<int>(sqlQuery, parameters,
+                                                commandType: CommandType.Text, transaction: _transaction);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
 
         private bool isClosed = false;
 
@@ -114,9 +158,9 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 
                 isClosed = true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
@@ -128,9 +172,9 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
                 _connection?.Close();
                 isClosed = true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 

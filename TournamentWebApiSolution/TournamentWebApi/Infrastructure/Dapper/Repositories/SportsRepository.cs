@@ -24,7 +24,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.StartTransaction();
 
-                string insertQuery = @"INSERT INTO [dbo].[Sports]([Name], [Description]) VALUES (@Name, @Description)";
+                string insertQuery = @"INSERT INTO [dbo].[Sport]([Name], [Description]) VALUES (@Name, @Description)";
                 // save the sport model
                 var rowsAffected = await this.SaveDataInTransactionUsingQueryAsync(insertQuery, model);
 
@@ -53,7 +53,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.StartTransaction();
 
-                string getQuery = @"SELECT * FROM [dbo].[Sports]";
+                string getQuery = @"SELECT * FROM [dbo].[Sport]";
 
                 // save the team model
                 var result = await LoadDataInTransactionUsingQueryAsync<SportContractModel, dynamic>(getQuery, null);
@@ -80,7 +80,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.StartTransaction();
 
-                string getQuery = @"SELECT * FROM [dbo].[Sports] WHERE SportId = @Id";
+                string getQuery = @"SELECT * FROM [dbo].[sport] WHERE SportId = @Id";
 
                 var result = await LoadSingleDataInTransactionUsingQueryAsync<SportContractModel, dynamic>(getQuery, new { Id = id });
 
@@ -106,7 +106,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.StartTransaction();
 
-                string updateQuery = @"UPDATE [dbo].[Sports] SET Name= @Name, Description= @Description WHERE SportId = @SportId";
+                string updateQuery = @"UPDATE [dbo].[sport] SET Name= @Name, Description= @Description WHERE SportId = @SportId";
 
                 var rowsAffected = await this.SaveDataInTransactionUsingQueryAsync(updateQuery,model);
 
@@ -136,7 +136,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.StartTransaction();
 
-                string deleteQuery = @"DELETE FROM [dbo].[Sports] WHERE SportId = @Id";
+                string deleteQuery = @"DELETE FROM [dbo].[sport] WHERE SportId = @Id";
 
                 // delete the row with id
                 var rowsAffected = await SaveDataInTransactionUsingQueryAsync(deleteQuery,new { Id=id});

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using TournamentWebApi.Models;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
@@ -12,16 +13,16 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
     [ApiController]
     public class BaseController : ControllerBase
     {
-        protected readonly UserManager<IdentityUser> userManager;
+        protected readonly UserManager<ApplicationUserFromIdentityModel> _userManager;
 
-        public BaseController(UserManager<IdentityUser> userManager)
+        public BaseController(UserManager<ApplicationUserFromIdentityModel> userManager)
         {
-            this.userManager = userManager;
+            this._userManager = userManager;
         }
 
-        protected async Task<IdentityUser> GetIdentityUser()
+        protected async Task<ApplicationUserFromIdentityModel> GetCurrentUser()
         {
-            IdentityUser user = await userManager.GetUserAsync(HttpContext.User);
+            var user = await _userManager.GetUserAsync(HttpContext.User);
 
             return user;
         }

@@ -14,10 +14,18 @@ namespace Contract.Models
 
         public string Description { get; set; }
 
-        [Required]
-        public int SportId { get; set; }
-        public string  Sport { get; set; }
-
         public int TeamStatsId { get; set; }
+        public string UserId { get; set; }
+    }
+
+    public class TeamStatsContractModel
+    {
+        public int TeamStatsId { get; set; }
+        public int Wins { get; set; }
+        public int Loss { get; set; }
+        public int Draw { get; set; }
+        public int matchesPlayed { get; set; }
+        public int goalsFor { get; set; }
+        public int goalsAgainst { get; set; }
     }
 }

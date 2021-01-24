@@ -14,6 +14,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         Task<IActionResult> AddTeamAsync(TeamContractModel model);
 
         Task<TeamContractModel> GetTeamAsync(int id);
+        Task<IEnumerable<TeamContractModel>> GetAllTeamsForUser(string userId);
         Task<IActionResult> DeleteTeamAsync(int id);
         Task<IActionResult> UpdateTeamAsync(TeamContractModel model);
     }
