@@ -38,7 +38,11 @@ namespace TournamentWebApi.Controllers
         {
             try
             {
-                //TODO::check for current user and not from the model
+                //Check for current user and not from the model
+                var currentUser = await GetCurrentUser();
+
+                //set current userId
+                model.UserId = currentUser.Id;
 
                 // Create teamstatsId for the team
                 return await teamRepo.AddTeamAsync(model);

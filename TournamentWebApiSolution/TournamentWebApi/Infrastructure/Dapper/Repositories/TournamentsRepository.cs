@@ -15,6 +15,116 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 
         }
 
+
+        /// <summary>
+        /// Add a new Team to the Team table.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
+        public async Task<IActionResult> AddTournamentAsync(TournamentContractModel model)
+        {
+            try
+            {
+                this.StartTransaction();
+
+                var newModel = new
+                {
+                    Name = model.Name,
+                    Description = model.Description,
+                    SportId = model.SportId,
+                    TournamentTypeId = model.TournamentTypeId,
+                    TournamentPointSystemId = model.TournamentPointSystemIdContractModel.TournamentPointSystemId,
+                    UserId = model.UserId
+                };
+
+                string insertQuery = @"INSERT INTO [dbo].[Tournament]([Name], [Description], [SportId], [TournamentTypeId], [TournamentPointSystemId], [UserId]) 
+                                        VALUES (@Name, @Description, @SportId, @TournamentTypeId, @TournamentPointSystemId, @UserId)";
+                // save the team model
+                var rowsAffected = await this.SaveDataInTransactionUsingQueryAsync(insertQuery, newModel);
+
+                this.CommitTransaction();
+
+                // if rows affected (item created)
+                if (rowsAffected > 0)
+                    return new OkResult();
+                else
+                {
+                    return new BadRequestResult();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                this.RollbackTransaction(); // rollback & close
+                //return false; ??
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get all team related to user.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<int> CreateSubmittedPointSystem(TournamentPointSystemIdContractModel model)
+        {
+            try
+            {
+                var defaultTeamStatsModel = model;
+                if (model.DefaultPointSystem == true)
+                {
+                    defaultTeamStatsModel = new TournamentPointSystemIdContractModel() { Name = "Default", DrawPoint = 1, LossPoint = 0, Winpoint = 3 };
+                }
+
+                this.StartTransaction();
+
+                string insertQuery = @"INSERT INTO [dbo].[TournamentPointSystem]([Name], [WinPoint], [DrawPoint], [LossPoint]) VALUES (@Name, @WinPoint, @DrawPoint, @LossPoint); SELECT CAST(SCOPE_IDENTITY() as int)";
+
+                // save the tournament Point System model
+                var TournamentPointSystemId = await this.SaveDataInTransactionAndGetIdAsync(insertQuery, defaultTeamStatsModel);
+
+                this.CommitTransaction();
+
+                return TournamentPointSystemId;
+            }
+            catch (Exception)
+            {
+                this.RollbackTransaction();
+                //return false; ??
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get all team related to user.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        //public async Task<int> GetDefaultPointSystemId()
+        //{
+        //try
+        //{
+        //    this.StartTransaction();
+
+        //    string getQuery = @"SELECT TournamentPointSystemId FROM [dbo].[TournamentPointSystem] WHERE Name='Default'";
+
+        //    // save the team model
+        //    var result = await LoadDataInTransactionUsingQueryAsync<int, dynamic>(getQuery, new { Id = userId });
+
+        //    this.CommitTransaction();
+        //    return result;
+        //}
+        //catch (Exception)
+        //{
+        //    this.RollbackTransaction();
+        //    //return false; ??
+        //    throw;
+        //}
+        //}
+
+
+        #region Tournament type
+
         public async Task<IActionResult> AddTypeAsync(TournamentTypeContractModel model)
         {
             try
@@ -93,7 +203,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 
                 string getQuery = @"SELECT * FROM [dbo].[TournamentTypes] WHERE TournamentTypeId=@Id";
 
-                var result = await LoadSingleDataInTransactionUsingQueryAsync<TournamentTypeContractModel,dynamic>(getQuery,new { Id = id });
+                var result = await LoadSingleDataInTransactionUsingQueryAsync<TournamentTypeContractModel, dynamic>(getQuery, new { Id = id });
 
                 this.CommitTransaction();
 
@@ -129,5 +239,8 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
                 throw;
             }
         }
+
+        #endregion
+
     }
 }

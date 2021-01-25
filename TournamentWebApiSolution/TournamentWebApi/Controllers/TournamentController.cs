@@ -7,19 +7,68 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Contract.Models;
 using TournamentWebApi.Infrastructure.Dapper.Repositories;
+using TournamentWebApi.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace TournamentWebApi.Controllers
 {
     [Route("api/[controller]s")]
     [ApiController]
     //[Authorize]
-    public class TournamentController : ControllerBase
+    public class TournamentController : BaseController
     {
         private readonly ITournamentsRepository tournamentRepo;
-        public TournamentController(ITournamentsRepository repo)
+        public TournamentController(ITournamentsRepository repo, UserManager<ApplicationUserFromIdentityModel> userManager) : base(userManager)
         {
             tournamentRepo = repo;
         }
+
+        /// <summary>
+        /// POST: api/Tournament. Add a tournament
+        /// </summary>
+        /// <param name="model">TournamentContractModel</param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> AddTournamentAsync(TournamentContractModel model)
+        {
+            try
+            {
+                //Check for current user and not from the model
+                //var currentUser = await GetCurrentUser();
+
+                //set current userId
+                //model.UserId = currentUser.Id;
+                //Testing
+                model.UserId = model.UserId;
+
+                //TODO: Get id of default point sytem.
+                if(model.TournamentPointSystemIdContractModel.DefaultPointSystem==true)
+                {
+                    model.TournamentPointSystemIdContractModel.TournamentPointSystemId = 1;
+                }
+                else
+                {
+                    model.TournamentPointSystemIdContractModel.TournamentPointSystemId = await tournamentRepo.CreateSubmittedPointSystem(model.TournamentPointSystemIdContractModel);
+                }
+
+                // Create teamstatsId for the team
+                return await tournamentRepo.AddTournamentAsync(model);
+            }
+            catch (Exception)
+            {
+                //log??
+                return BadRequest();
+            }
+        }
+
+        //TODO:
+        // Update
+        // Delete
+        // Get a specific tournament
+        // Get all tournament for user.
 
         #region Tournament type
 

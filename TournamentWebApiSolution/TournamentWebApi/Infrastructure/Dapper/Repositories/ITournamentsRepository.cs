@@ -9,6 +9,8 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
     public interface ITournamentsRepository : IRepository
     {
+        Task<IActionResult> AddTournamentAsync(TournamentContractModel model);
+        Task<int> CreateSubmittedPointSystem(TournamentPointSystemIdContractModel model);
         Task<IActionResult> AddTypeAsync(TournamentTypeContractModel model);
         Task<IEnumerable<TournamentTypeContractModel>> GetAllTypeAsync();
         Task<TournamentTypeContractModel> GetTypeAsync(int id);
