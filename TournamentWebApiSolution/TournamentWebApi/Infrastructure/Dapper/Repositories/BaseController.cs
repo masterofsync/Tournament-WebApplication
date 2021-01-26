@@ -26,5 +26,28 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 
             return user;
         }
+
+
+        /// <summary>
+        /// Check if user is admin or authorized to update/delete the item.
+        /// </summary>
+        /// <param name="currentUser">Current user of the httpcontext</param>currentUser
+        /// <param name="correspondingUserId">User Id of the corresponding item</param>
+        /// <returns></returns>
+        protected async Task<bool> CheckIfAuthorized(ApplicationUserFromIdentityModel currentUser, string correspondingUserId)
+        {
+            try
+            {
+                if (await _userManager.IsInRoleAsync(currentUser, "Admin") || String.Equals(correspondingUserId, currentUser.Id))
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }

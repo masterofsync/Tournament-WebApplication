@@ -67,8 +67,9 @@ namespace TournamentWebApi.Controllers
         {
             try
             {
+                var UserIdOfTeam = await teamRepo.GetAssociatedUserIdForTeamAsync(teamId);
                 // Check if the corresponding team is of that user.
-                if (await CheckIfAuthorized(await GetCurrentUser(), teamId) != false)
+                if (await CheckIfAuthorized(await GetCurrentUser(), UserIdOfTeam) != false)
                 {
                     // Create teamstatsId for the team
                     return await teamRepo.DeleteTeamAsync(teamId);
@@ -97,8 +98,9 @@ namespace TournamentWebApi.Controllers
         {
             try
             {
+                var UserIdOfTeam = await teamRepo.GetAssociatedUserIdForTeamAsync(teamModel.TeamId);
                 // Check if the corresponding team is of that user.
-                if (await CheckIfAuthorized(await GetCurrentUser(), teamModel.TeamId) != false)
+                if (await CheckIfAuthorized(await GetCurrentUser(), UserIdOfTeam) != false)
                 {
                     // Create teamstatsId for the team
                     return await teamRepo.UpdateTeamAsync(teamModel);
@@ -127,8 +129,9 @@ namespace TournamentWebApi.Controllers
         {
             try
             {
+                var UserIdOfTeam = await teamRepo.GetAssociatedUserIdForTeamAsync(teamId);
                 // Check if the corresponding team is of that user.
-                if (await CheckIfAuthorized(await GetCurrentUser(), teamId) != false)
+                if (await CheckIfAuthorized(await GetCurrentUser(), UserIdOfTeam) != false)
                 {
                     // return team with ok code.
                     return Ok(await teamRepo.GetTeamAsync(teamId));
@@ -173,29 +176,5 @@ namespace TournamentWebApi.Controllers
                 return BadRequest();
             }
         }
-
-        /// <summary>
-        /// Check if user is admin or authorized to update/delete a team.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="teamId"></param>
-        /// <returns></returns>
-        private async Task<bool> CheckIfAuthorized(ApplicationUserFromIdentityModel user, int teamId)
-        {
-            try
-            {
-                var team = await teamRepo.GetTeamAsync(teamId);
-                if (await _userManager.IsInRoleAsync(user, "Admin") || String.Equals(team.UserId, user.Id))
-                {
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
     }
 }

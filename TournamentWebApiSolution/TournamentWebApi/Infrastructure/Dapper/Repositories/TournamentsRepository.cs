@@ -31,8 +31,8 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
                 {
                     Name = model.Name,
                     Description = model.Description,
-                    SportId = model.SportId,
-                    TournamentTypeId = model.TournamentTypeId,
+                    SportId = model.Sport.SportId,
+                    TournamentTypeId = model.TournamentType.TournamentTypeId,
                     TournamentPointSystemId = model.TournamentPointSystemIdContractModel.TournamentPointSystemId,
                     UserId = model.UserId
                 };
@@ -51,7 +51,6 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
                 {
                     return new BadRequestResult();
                 }
-
             }
             catch (Exception ex)
             {
@@ -60,6 +59,68 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
                 throw;
             }
         }
+
+
+        /// <summary>
+        /// Get tournament data given id.
+        /// </summary>
+        /// <param name="tournamentId">integer tournamentId</param>
+        /// <returns>TeamContractModel</returns>
+        public async Task<TournamentContractModel> GetTournamentAsync(int tournamentId)
+        {
+            try
+            {
+                return null;
+
+                this.StartTransaction();
+
+                // TODO: USE Join to get data for all nested models in tournament
+                // SELECT * FROM Tournament JOIN Sport ON (Tournament.SportId = Sport.SportId) JOIN TournamentType ON (Tournament.TournamentTypeId=TournamentType.TournamentTypeId) 
+                // JOIN TournamentPointSystem ON (Tournament.TournamentPointSystemId =TournamentPointSystem.TournamentPointSystemId)  WHERE TournamentId=tournamentId
+
+                string getQuery = @"SELECT * FROM[dbo].[Tournament] WHERE TournamentId=@Id";
+
+                var result = await LoadSingleDataInTransactionUsingQueryAsync<TournamentContractModel, dynamic>(getQuery, new { Id = tournamentId });
+                this.CommitTransaction();
+
+                return result;
+            }
+            catch (Exception)
+            {
+                this.RollbackTransaction(); // rollback & close
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get all tournaments related to user.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<TournamentContractModel>> GetAllTournamentsForUser(string userId)
+        {
+            try
+            {
+                return null;
+                this.StartTransaction();
+
+                // TODO: GET all tournaments for the user with JOIN??? 
+                string getQuery = @"SELECT * FROM [dbo].[Tournament] WHERE UserId=@Id";
+
+                // save the team model
+                var result = await LoadDataInTransactionUsingQueryAsync<TournamentContractModel, dynamic>(getQuery, new { Id = userId });
+
+                this.CommitTransaction();
+                return result;
+            }
+            catch (Exception)
+            {
+                this.RollbackTransaction();
+                //return false; ??
+                throw;
+            }
+        }
+
 
         /// <summary>
         /// Get all team related to user.
@@ -94,6 +155,32 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
                 throw;
             }
         }
+
+        /// <summary>
+        /// Get User Id of the associated tournament.
+        /// </summary>
+        /// <param name="tournamentId">integer tournament id</param>
+        /// <returns>integer UserId for tournament</returns>
+        public async Task<string> GetAssociatedUserIdForTournamentAsync(int tournamentId)
+        {
+            try
+            {
+                this.StartTransaction();
+
+                string getQuery = @"SELECT UserId FROM[dbo].[Tournament] WHERE TournamentId=@Id";
+
+                var result = await LoadSingleDataInTransactionUsingQueryAsync<string, dynamic>(getQuery, new { Id = tournamentId });
+                this.CommitTransaction();
+
+                return result;
+            }
+            catch (Exception)
+            {
+                this.RollbackTransaction(); // rollback & close
+                throw;
+            }
+        }
+
 
         /// <summary>
         /// Get all team related to user.

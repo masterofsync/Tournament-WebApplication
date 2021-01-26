@@ -80,7 +80,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         }
 
         /// <summary>
-        /// 
+        /// Get team data given id.
         /// </summary>
         /// <param name="id">integer id</param>
         /// <returns>TeamContractModel</returns>
@@ -93,6 +93,31 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
                 string getQuery = @"SELECT * FROM[dbo].[Team] WHERE TeamId=@Id";
 
                 var result = await LoadSingleDataInTransactionUsingQueryAsync<TeamContractModel, dynamic>(getQuery, new { Id = id });
+                this.CommitTransaction();
+
+                return result;
+            }
+            catch (Exception)
+            {
+                this.RollbackTransaction(); // rollback & close
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get User Id of the associated team.
+        /// </summary>
+        /// <param name="id">integer id</param>
+        /// <returns>TeamContractModel</returns>
+        public async Task<string> GetAssociatedUserIdForTeamAsync(int teamId)
+        {
+            try
+            {
+                this.StartTransaction();
+
+                string getQuery = @"SELECT UserId FROM[dbo].[Team] WHERE TeamId=@Id";
+
+                var result = await LoadSingleDataInTransactionUsingQueryAsync<string, dynamic>(getQuery, new { Id = teamId });
                 this.CommitTransaction();
 
                 return result;

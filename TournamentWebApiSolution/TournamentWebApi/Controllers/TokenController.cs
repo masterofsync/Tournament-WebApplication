@@ -19,10 +19,10 @@ namespace TournamentWebApi.Controllers
     public class TokenController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUserFromIdentityModel> _userManager;
         private readonly IConfiguration _config;
 
-        public TokenController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IConfiguration config)
+        public TokenController(ApplicationDbContext context, UserManager<ApplicationUserFromIdentityModel> userManager, IConfiguration config)
         {
             this._context = context;
             this._userManager = userManager;

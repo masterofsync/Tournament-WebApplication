@@ -10,10 +10,14 @@ namespace Contract.Models
         public int TournamentId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public int SportId { get; set; }
-        public string Sport { get; set; }
-        public int TournamentTypeId { get; set; }
-        public string TournamentType { get; set; }
+        //public int SportId { get; set; }
+        //public string Sport { get; set; }
+
+        public SportContractModel Sport { get; set; }
+        //public int TournamentTypeId { get; set; }
+        //public string TournamentType { get; set; }
+
+        public TournamentTypeContractModel TournamentType { get; set; }
         public TournamentPointSystemIdContractModel TournamentPointSystemIdContractModel { get; set; }
         public string UserId { get; set; }
     }

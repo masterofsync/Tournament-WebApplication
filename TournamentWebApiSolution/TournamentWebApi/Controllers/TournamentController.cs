@@ -64,11 +64,73 @@ namespace TournamentWebApi.Controllers
             }
         }
 
+
+
+        /// <summary>
+        /// GET: api/Tournament. Get a specific tournament
+        /// </summary>
+        /// <param name="tournamentId">tournament id</param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> GetTournamentAsync(int tournamentId)
+        {
+            try
+            {
+                var UserIdOfTournament = await tournamentRepo.GetAssociatedUserIdForTournamentAsync(tournamentId);
+                // Check if the corresponding team is of that user.
+                if (await CheckIfAuthorized(await GetCurrentUser(), UserIdOfTournament) != false)
+                {
+                    // return team with ok code.
+                    return Ok(await tournamentRepo.GetTournamentAsync(tournamentId));
+                }
+
+                //not authorized?? or not found??
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                //log??
+                return BadRequest();
+            }
+        }
+
+        /// <summary>
+        /// GET: api/Tournament. Get all tournament for user.
+        /// </summary>
+        /// <param name="model">TeamContractModel</param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
+        [HttpGet("[action]")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> GetAllTournamentsForUserAsync()
+        {
+            try
+            {
+                var currentUser = await GetCurrentUser();
+                var repo = await tournamentRepo.GetAllTournamentsForUser(currentUser.Id);
+
+                if (repo != null)
+                {
+                    return Ok(repo);
+                }
+                //not authorized?? or not found??
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                //log??
+                return BadRequest();
+            }
+        }
+
         //TODO:
         // Update
         // Delete
-        // Get a specific tournament
-        // Get all tournament for user.
+
 
         #region Tournament type
 
