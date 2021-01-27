@@ -12,11 +12,10 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         Task<IActionResult> AddTournamentAsync(TournamentContractModel model);
         Task<TournamentContractModel> GetTournamentAsync(int tournamentId);
         Task<IEnumerable<TournamentContractModel>> GetAllTournamentsForUser(string userId);
-
         Task<int> CreateSubmittedPointSystem(TournamentPointSystemIdContractModel model);
         Task<string> GetAssociatedUserIdForTournamentAsync(int tournamentId);
-
-
+        Task<IActionResult> UpdateTournamentAsync(TournamentContractModel model);
+        Task<IActionResult> DeleteTournamentAsync(int tournamentId);
         Task<IActionResult> AddTypeAsync(TournamentTypeContractModel model);
         Task<IEnumerable<TournamentTypeContractModel>> GetAllTypeAsync();
         Task<TournamentTypeContractModel> GetTypeAsync(int id);

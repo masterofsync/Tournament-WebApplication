@@ -37,12 +37,13 @@ namespace TournamentWebApi.Controllers
             try
             {
                 //Check for current user and not from the model
-                //var currentUser = await GetCurrentUser();
+                var currentUser = await GetCurrentUser();
 
                 //set current userId
-                //model.UserId = currentUser.Id;
+                model.UserId = currentUser.Id;
+
                 //Testing
-                model.UserId = model.UserId;
+                //model.UserId = model.UserId;
 
                 //TODO: Get id of default point sytem.
                 if(model.TournamentPointSystemIdContractModel.DefaultPointSystem==true)
@@ -127,10 +128,68 @@ namespace TournamentWebApi.Controllers
             }
         }
 
-        //TODO:
-        // Update
-        // Delete
+        /// <summary>
+        /// PUT: api/Tournament. Update tournament
+        /// </summary>
+        /// <param name="model">TournamentContractModel</param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> UpdateTournamentAsync(TournamentContractModel TournamentModel)
+        {
+            try
+            {
+                var UserIdOfTeam = await tournamentRepo.GetAssociatedUserIdForTournamentAsync(TournamentModel.TournamentId);
+                // Check if the corresponding tournament is of that user or is admin
+                if (await CheckIfAuthorized(await GetCurrentUser(), UserIdOfTeam) != false)
+                {
+                    // Create teamstatsId for the team
+                    return await tournamentRepo.UpdateTournamentAsync(TournamentModel);
+                }
 
+                //not authorized?? or not found??
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                //log??
+                return BadRequest();
+            }
+        }
+
+        /// <summary>
+        /// DELETE: api/Tournament. Delete tournament
+        /// </summary>
+        /// <param name="tournamentId">integer id</param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> DeleteTournamentAsync(int tournamentId)
+        {
+            try
+            {
+                var UserIdOfTeam = await tournamentRepo.GetAssociatedUserIdForTournamentAsync(tournamentId);
+                
+                // Check if the corresponding team is of that user.
+                if (await CheckIfAuthorized(await GetCurrentUser(), UserIdOfTeam) != false)
+                {
+                    // Create teamstatsId for the team
+                    return await tournamentRepo.DeleteTournamentAsync(tournamentId);
+                }
+
+                //not authorized?? or not found??
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                //log??
+                return BadRequest();
+            }
+        }
 
         #region Tournament type
 

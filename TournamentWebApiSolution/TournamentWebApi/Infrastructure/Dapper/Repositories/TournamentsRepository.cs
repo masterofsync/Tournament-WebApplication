@@ -15,7 +15,6 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 
         }
 
-
         /// <summary>
         /// Add a new Team to the Team table.
         /// </summary>
@@ -60,6 +59,8 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             }
         }
 
+
+        //TODO :: GET and GETALL repository
 
         /// <summary>
         /// Get tournament data given id.
@@ -117,6 +118,80 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
             {
                 this.RollbackTransaction();
                 //return false; ??
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Update tournament data
+        /// </summary>
+        /// <param name="model">TournamentContractModel</param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
+        public async Task<IActionResult> UpdateTournamentAsync(TournamentContractModel model)
+        {
+            try
+            {
+                this.StartTransaction();
+
+                var newModel = new
+                {
+                    TournamentId = model.TournamentId,
+                    Name = model.Name,
+                    Description = model.Description,
+                    SportId = model.Sport.SportId,
+                    TournamentTypeId = model.TournamentType.TournamentTypeId,
+                    TournamentPointSystemId = model.TournamentPointSystemIdContractModel.TournamentPointSystemId
+                };
+
+                string updateQuery = @"UPDATE [dbo].[Tournament] SET Name=@Name, Description=@Description, SportId=@SportId, TournamentTypeId=@TournamentTypeId, TournamentPointSystemId=@TournamentPointSystemId WHERE TournamentId=@TournamentId";
+
+                var rowsAffected = await this.SaveDataInTransactionUsingQueryAsync(updateQuery, newModel);
+
+                this.CommitTransaction();
+
+                // if rows affected (item created)
+                if (rowsAffected > 0)
+                    return new OkResult();
+                else
+                    return new BadRequestResult();
+            }
+            catch (Exception s)
+            {
+                this.RollbackTransaction(); // rollback & close
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Delete tournament given id
+        /// </summary>
+        /// <param name="id">integer id</param>
+        /// <returns>Ok(Status code:200 if updated) else BadRequest(Status code: 400 if not updated)</returns>
+        public async Task<IActionResult> DeleteTournamentAsync(int tournamentId)
+        {
+            try
+            {
+                this.StartTransaction();
+
+                // delete all the rows for tournament associated tables
+                string deleteTournamentTeamsQuery = @"DELETE FROM [dbo].[Tournament_Team] WHERE TournamentId=@Id";
+
+                var rowsAffected = await SaveDataInTransactionUsingQueryAsync(deleteTournamentTeamsQuery, new { Id = tournamentId });
+
+                string deleteTournamentQuery = @"DELETE FROM [dbo].[Tournament] WHERE TournamentId = @Id";
+
+                rowsAffected = await SaveDataInTransactionUsingQueryAsync(deleteTournamentQuery, new { Id = tournamentId });
+                this.CommitTransaction();
+
+                // if rows affected (item deleted)
+                if (rowsAffected > 0)
+                    return new OkResult();
+                else
+                    return new BadRequestResult();
+            }
+            catch (Exception)
+            {
+                this.RollbackTransaction(); // rollback & close
                 throw;
             }
         }
