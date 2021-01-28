@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Contract.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Dapper;
+using System.Data;
 
 namespace TournamentWebApi.Infrastructure.Dapper.Repositories
 {
@@ -32,7 +34,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
                     Description = model.Description,
                     SportId = model.Sport.SportId,
                     TournamentTypeId = model.TournamentType.TournamentTypeId,
-                    TournamentPointSystemId = model.TournamentPointSystemIdContractModel.TournamentPointSystemId,
+                    TournamentPointSystemId = model.TournamentPointSystem.TournamentPointSystemId,
                     UserId = model.UserId
                 };
 
@@ -71,20 +73,40 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         {
             try
             {
-                return null;
 
                 this.StartTransaction();
 
-                // TODO: USE Join to get data for all nested models in tournament
-                // SELECT * FROM Tournament JOIN Sport ON (Tournament.SportId = Sport.SportId) JOIN TournamentType ON (Tournament.TournamentTypeId=TournamentType.TournamentTypeId) 
-                // JOIN TournamentPointSystem ON (Tournament.TournamentPointSystemId =TournamentPointSystem.TournamentPointSystemId)  WHERE TournamentId=tournamentId
+                // Sql Query to join and get all the nested object data.
+                string getQuery = @"SELECT t.*, s.*,tt.*, tps.* FROM [dbo].[Tournament] t 
+                                    LEFT JOIN Sport s ON (s.SportId=t.SportId)
+                                    LEFT JOIN TournamentType tt ON (tt.TournamentTypeId=t.TournamentTypeId)
+                                    LEFT JOIN TournamentPointSystem tps ON (tps.TournamentPointSystemId=t.TournamentPointSystemId)
+                                    WHERE t.TournamentId=@Id";
 
-                string getQuery = @"SELECT * FROM[dbo].[Tournament] WHERE TournamentId=@Id";
+                // expression to set all the required nested objects.
+                var result = await GetConnection.QueryAsync<TournamentContractModel, SportContractModel, TournamentTypeContractModel, TournamentPointSystemContractModel, TournamentContractModel>(getQuery,
+                            (t, s, tt, tps) =>
+                            {
+                                t.Sport = new SportContractModel();
+                                t.Sport.SportId = s.SportId;
+                                t.Sport.Description = s.Description;
+                                t.Sport.Name = s.Name;
+                                t.TournamentType = new TournamentTypeContractModel();
+                                t.TournamentType.Name = tt.Name;
+                                t.TournamentType.TournamentTypeId = tt.TournamentTypeId;
+                                t.TournamentType.Description = tt.Description;
+                                t.TournamentPointSystem = new TournamentPointSystemContractModel();
+                                t.TournamentPointSystem.TournamentPointSystemId = tps.TournamentPointSystemId;
+                                t.TournamentPointSystem.Name = tps.Name;
+                                t.TournamentPointSystem.Winpoint = tps.Winpoint;
+                                t.TournamentPointSystem.DrawPoint = tps.DrawPoint;
+                                t.TournamentPointSystem.LossPoint = tps.LossPoint;
+                                return t;
+                            }, new { Id = tournamentId }, splitOn: "TournamentId,SportId,TournamentTypeId,TournamentPointSystemId", commandType: CommandType.Text, transaction: Transaction);
 
-                var result = await LoadSingleDataInTransactionUsingQueryAsync<TournamentContractModel, dynamic>(getQuery, new { Id = tournamentId });
                 this.CommitTransaction();
 
-                return result;
+                return result.FirstOrDefault();
             }
             catch (Exception)
             {
@@ -102,16 +124,38 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         {
             try
             {
-                return null;
                 this.StartTransaction();
 
-                // TODO: GET all tournaments for the user with JOIN??? 
-                string getQuery = @"SELECT * FROM [dbo].[Tournament] WHERE UserId=@Id";
+                // Sql Query to join and get all the nested object data.
+                string getQuery = @"SELECT t.*, s.*,tt.*, tps.* FROM [dbo].[Tournament] t 
+                                    LEFT JOIN Sport s ON (s.SportId=t.SportId)
+                                    LEFT JOIN TournamentType tt ON (tt.TournamentTypeId=t.TournamentTypeId)
+                                    LEFT JOIN TournamentPointSystem tps ON (tps.TournamentPointSystemId=t.TournamentPointSystemId)
+                                    WHERE t.UserId=@Id";
 
-                // save the team model
-                var result = await LoadDataInTransactionUsingQueryAsync<TournamentContractModel, dynamic>(getQuery, new { Id = userId });
+                // expression to set all the required nested objects.
+                var result = await GetConnection.QueryAsync<TournamentContractModel, SportContractModel, TournamentTypeContractModel, TournamentPointSystemContractModel, TournamentContractModel>(getQuery,
+                            (t, s, tt, tps) =>
+                            {
+                                t.Sport = new SportContractModel();
+                                t.Sport.SportId = s.SportId;
+                                t.Sport.Description = s.Description;
+                                t.Sport.Name = s.Name;
+                                t.TournamentType = new TournamentTypeContractModel();
+                                t.TournamentType.Name = tt.Name;
+                                t.TournamentType.TournamentTypeId = tt.TournamentTypeId;
+                                t.TournamentType.Description = tt.Description;
+                                t.TournamentPointSystem = new TournamentPointSystemContractModel();
+                                t.TournamentPointSystem.TournamentPointSystemId = tps.TournamentPointSystemId;
+                                t.TournamentPointSystem.Name = tps.Name;
+                                t.TournamentPointSystem.Winpoint = tps.Winpoint;
+                                t.TournamentPointSystem.DrawPoint = tps.DrawPoint;
+                                t.TournamentPointSystem.LossPoint = tps.LossPoint;
+                                return t;
+                            }, new { Id = userId }, splitOn: "TournamentId,SportId,TournamentTypeId,TournamentPointSystemId", commandType: CommandType.Text, transaction: Transaction);
 
                 this.CommitTransaction();
+
                 return result;
             }
             catch (Exception)
@@ -140,7 +184,7 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
                     Description = model.Description,
                     SportId = model.Sport.SportId,
                     TournamentTypeId = model.TournamentType.TournamentTypeId,
-                    TournamentPointSystemId = model.TournamentPointSystemIdContractModel.TournamentPointSystemId
+                    TournamentPointSystemId = model.TournamentPointSystem.TournamentPointSystemId
                 };
 
                 string updateQuery = @"UPDATE [dbo].[Tournament] SET Name=@Name, Description=@Description, SportId=@SportId, TournamentTypeId=@TournamentTypeId, TournamentPointSystemId=@TournamentPointSystemId WHERE TournamentId=@TournamentId";
@@ -202,14 +246,14 @@ namespace TournamentWebApi.Infrastructure.Dapper.Repositories
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<int> CreateSubmittedPointSystem(TournamentPointSystemIdContractModel model)
+        public async Task<int> CreateSubmittedPointSystem(TournamentPointSystemContractModel model)
         {
             try
             {
                 var defaultTeamStatsModel = model;
                 if (model.DefaultPointSystem == true)
                 {
-                    defaultTeamStatsModel = new TournamentPointSystemIdContractModel() { Name = "Default", DrawPoint = 1, LossPoint = 0, Winpoint = 3 };
+                    defaultTeamStatsModel = new TournamentPointSystemContractModel() { Name = "Default", DrawPoint = 1, LossPoint = 0, Winpoint = 3 };
                 }
 
                 this.StartTransaction();

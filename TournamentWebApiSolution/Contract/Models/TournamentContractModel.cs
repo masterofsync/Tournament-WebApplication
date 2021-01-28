@@ -18,7 +18,7 @@ namespace Contract.Models
         //public string TournamentType { get; set; }
 
         public TournamentTypeContractModel TournamentType { get; set; }
-        public TournamentPointSystemIdContractModel TournamentPointSystemIdContractModel { get; set; }
+        public TournamentPointSystemContractModel TournamentPointSystem { get; set; }
         public string UserId { get; set; }
     }
 
@@ -29,7 +29,7 @@ namespace Contract.Models
         public string Description { get; set; }
     }
 
-    public class TournamentPointSystemIdContractModel
+    public class TournamentPointSystemContractModel
     {
         public int TournamentPointSystemId { get; set; }
         public string Name { get; set; }

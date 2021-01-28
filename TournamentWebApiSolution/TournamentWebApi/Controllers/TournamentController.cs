@@ -46,13 +46,13 @@ namespace TournamentWebApi.Controllers
                 //model.UserId = model.UserId;
 
                 //TODO: Get id of default point sytem.
-                if(model.TournamentPointSystemIdContractModel.DefaultPointSystem==true)
+                if(model.TournamentPointSystem.DefaultPointSystem==true)
                 {
-                    model.TournamentPointSystemIdContractModel.TournamentPointSystemId = 1;
+                    model.TournamentPointSystem.TournamentPointSystemId = 1;
                 }
                 else
                 {
-                    model.TournamentPointSystemIdContractModel.TournamentPointSystemId = await tournamentRepo.CreateSubmittedPointSystem(model.TournamentPointSystemIdContractModel);
+                    model.TournamentPointSystem.TournamentPointSystemId = await tournamentRepo.CreateSubmittedPointSystem(model.TournamentPointSystem);
                 }
 
                 // Create teamstatsId for the team
